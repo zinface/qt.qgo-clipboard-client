@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=云剪贴板(基于Qt的客户端)
+Comment=用于简单的使用
+Type=Application
+Exec=qgo-clipboard-client
+Icon=/usr/share/icons/hicolor/350x350/apps/qgo-clipboard-client.png
+Categories=Development
+Keywords=
+
+# Generated from the DesktopGenerater component of the z-Tools toolkit
