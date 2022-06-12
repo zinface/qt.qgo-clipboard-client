@@ -15,7 +15,10 @@ class ClipboardApi : public QObject {
 public:
     void set(QString mime, QString baseData);
     QJsonObject get();
-    QJsonObject check();
+    QJsonObject info();
+
+private:
+    HttpRequest *httpUtil = new HttpRequest;
 };
 
 

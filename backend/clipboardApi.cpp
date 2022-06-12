@@ -3,34 +3,43 @@
 void ClipboardApi::set(QString mime, QString baseData)
 {
     QNetworkRequest request;
-    request.setUrl(QUrl(REMOTE_HOST "/set"));
+    request.setUrl(QUrl(REMOTE_HOST "/clipboard"));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QString data(QString("mime=%1&data=%2").arg(mime).arg(baseData.replace("+", "%2B")));
+    QJsonObject object;
+    object["mime"] = mime;
+    object["data"] = baseData;
 
-    HttpRequest *httpRequest = new HttpRequest;
-    httpRequest->postRequest(request, data.toLocal8Bit());
+    QJsonDocument document(object);
+    QByteArray jsonData = document.toJson(QJsonDocument::JsonFormat::Compact);
+
+    // QTextStream(stdout) << "Set: " << QString(document.toJson(QJsonDocument::Compact)) << "\n";
+    
+    httpUtil->postRequest(request, jsonData);
 }
 
 QJsonObject ClipboardApi::get()
 {
     QNetworkRequest request;
-    request.setUrl(QUrl(REMOTE_HOST "/get"));
+    request.setUrl(QUrl(REMOTE_HOST "/clipboard"));
 
-    HttpRequest *httpRequest = new HttpRequest;
-    // connect(httpRequest, &HttpRequest::finished, [=](QString data){
+    QByteArray data = httpUtil->getRequestSync(request);
 
-    // });
-    QJsonDocument document = QJsonDocument::fromJson(httpRequest->getRequestSync(request));
+    QJsonDocument document = QJsonDocument::fromJson(data);
+    
+    // QTextStream(stdout) << "Get: " << QString(document.toJson(QJsonDocument::Compact)) << "\n";
 
     return document.object();
 }
 
-QJsonObject ClipboardApi::check()
+QJsonObject ClipboardApi::info()
 {
     QNetworkRequest request;
-    request.setUrl(QUrl(REMOTE_HOST "/check"));
+    request.setUrl(QUrl(REMOTE_HOST "/clipboard/info"));
 
-    HttpRequest *httpRequest = new HttpRequest;
-    QJsonDocument document = QJsonDocument::fromJson(httpRequest->getRequestSync(request));
+    QJsonDocument document = QJsonDocument::fromJson(httpUtil->getRequestSync(request));
+
+    // QTextStream(stdout) << "Info: " << QString(document.toJson(QJsonDocument::Compact)) << "\n";
+
     return document.object();
 }

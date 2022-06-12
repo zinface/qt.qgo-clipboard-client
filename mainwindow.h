@@ -24,19 +24,19 @@ public slots:
     void clipboardChanged();
     void clipboardCopy();
     void clipboardCopyBase64();
+    void onClipboardCheckLatest();
     void onClipboardUpdate();
     void onSysTrayActivated(QSystemTrayIcon::ActivationReason reason);
 
 private:
     QClipboard *clipboard;
     ClipboardApi *clipboardApi;
-    QLabel *widget;
+    QLabel *previewLabel;
     QString checkTime;
     QString checkData;
     QString checkMime;
 
     QSystemTrayIcon *systray;
-
 
 protected:
     void closeEvent(QCloseEvent *event);

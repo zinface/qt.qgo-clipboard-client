@@ -36,7 +36,7 @@ public:
 };
 
 class Base64Text {
-    public:
+public:
     static QString fromBase64(QString base64) {
         return QByteArray::fromBase64(base64.toLocal8Bit());
     }

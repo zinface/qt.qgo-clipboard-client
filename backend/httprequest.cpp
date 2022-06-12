@@ -7,6 +7,8 @@ void HttpRequest::getRequest(const QNetworkRequest &request)
     manager->get(request);
     connect(manager, &QNetworkAccessManager::finished, 
         this, &HttpRequest::readyRead);
+    connect(manager, &QNetworkAccessManager::finished, 
+        manager, &QNetworkAccessManager::deleteLater);
 }
 
 QByteArray HttpRequest::getRequestSync(const QNetworkRequest &request)
@@ -19,10 +21,8 @@ QByteArray HttpRequest::getRequestSync(const QNetworkRequest &request)
         &loop, &QEventLoop::quit);
     loop.exec();
 
-    // QTextCodec *codec = QTextCodec::codecForName("utf8");
-    // QString repStr = codec->toUnicode(reply->readAll())
-
     reply->deleteLater();
+    manager->deleteLater();
     return reply->readAll();
 }
 
@@ -33,6 +33,8 @@ void HttpRequest::postRequest(const QNetworkRequest &request, QByteArray data)
     manager->post(request, data);
     connect(manager, &QNetworkAccessManager::finished, 
         this, &HttpRequest::readyRead);
+    connect(manager, &QNetworkAccessManager::finished, 
+        manager, &QNetworkAccessManager::deleteLater);
 }
 
 // public slots:

@@ -18,7 +18,7 @@
 
 
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
-, widget(new QLabel(this))
+, previewLabel(new QLabel(this))
 {
     clipboard = qApp->clipboard();
     clipboardApi = new ClipboardApi;
@@ -28,33 +28,22 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(clipboard, &QClipboard::dataChanged, this, &MainWindow::clipboardChanged);
 
     QHBoxLayout *layout = new QHBoxLayout(this);
-    layout->addWidget(widget);
+    layout->addWidget(previewLabel);
 
     QAction *a_copy = new QAction("复制");
     QAction *a_copy_base64 = new QAction("复制为Base64");
     connect(a_copy, &QAction::triggered, this, &MainWindow::clipboardCopy);
     connect(a_copy_base64, &QAction::triggered, this, &MainWindow::clipboardCopyBase64);
 
-    widget->addAction(a_copy);
-    widget->addAction(a_copy_base64);
-    widget->setContextMenuPolicy(Qt::ContextMenuPolicy::ActionsContextMenu);
-
+    previewLabel->addAction(a_copy);
+    previewLabel->addAction(a_copy_base64);
+    previewLabel->setContextMenuPolicy(Qt::ContextMenuPolicy::ActionsContextMenu);
 
     QTimer *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, [=](){
-        auto object = clipboardApi->check();
-        if (object.contains("createAt")) {
-            if (object.value("createAt").toString().compare(checkTime) != 0) {
-                // QTextStream(stdout) << "createAt:" << object.value("createAt").toString() << "\n";
-                // QTextStream(stdout) << "checkTime:" << checkTime << "\n";
-                onClipboardUpdate();
-            }
-        }
-    });
+    connect(timer, &QTimer::timeout, this, &MainWindow::onClipboardCheckLatest);
     // ms
-    timer->setInterval(3000);
+    timer->setInterval(1000 * 3);
     timer->start();
-
 
     // Systray 
     QAction *showWindow = new QAction("显示窗口");
@@ -83,8 +72,14 @@ MainWindow::~MainWindow()
     
 }
 
+/**
+ * @brief  监听剪贴板变化
+ * @note   
+ * @retval None
+ */
 void MainWindow::clipboardChanged()
 {
+    // 获取剪贴板文本数据
     QString text = clipboard->text();
     if (!text.isEmpty()) {
         if (text.compare(checkData) == 0) {
@@ -95,18 +90,22 @@ void MainWindow::clipboardChanged()
         return;
     }
 
+    // 获取剪贴板图片数据
     QImage img = clipboard->image();
     if (img.isNull()) {
-        QTextStream(stdout) << "Not Image" << "\n";
+            QTextStream(stdout) << __FUNCTION__ << 
+                QString("") << "\n";
         return;
     }
-    int x = img.width();
-    int y = img.height();
 
-    QTextStream(stdout) << "clipboard: " << x << " " << y << "\n";
-    widget->setFixedWidth(x);
-    widget->setFixedHeight(y);
-    widget->setPixmap(QPixmap::fromImage(img));
+    int imgW = img.width();
+    int imgH = img.height();
+
+    QTextStream(stdout) << __FUNCTION__ << 
+        QString("Image: %1x%2\n").arg(imgW).arg(imgH);
+    previewLabel->setFixedWidth(imgW);
+    previewLabel->setFixedHeight(imgH);
+    previewLabel->setPixmap(QPixmap::fromImage(img));
 
     clipboardApi->set("image", Base64Pixmap::fromImage(QPixmap::fromImage(img)));
     checkData = Base64Pixmap::fromImage(QPixmap::fromImage(img));
@@ -114,26 +113,59 @@ void MainWindow::clipboardChanged()
 
 void MainWindow::clipboardCopy()
 {
-    QPixmap pixmap = widget->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
+    QPixmap pixmap = previewLabel->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
     clipboard->setPixmap(pixmap);
 }
 
 void MainWindow::clipboardCopyBase64()
 {
-    QPixmap pixmap = widget->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
+    QPixmap pixmap = previewLabel->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
     clipboard->setText(Base64Pixmap::fromImage(pixmap));
 }
 
+/**
+ * @brief  获取云剪贴板状态信息
+ * @note   
+ * @retval None
+ */
+void MainWindow::onClipboardCheckLatest()
+{
+    auto object = clipboardApi->info();
+    if (object.contains("create_at")) {
+        if (object.value("create_at").toString().compare(checkTime) != 0) {
+            onClipboardUpdate();
+        }
+    }
+}
+
+/**
+ * @brief  同步云端状态到本地
+ * @note   
+ * @retval None
+ */
 void MainWindow::onClipboardUpdate()
 {
     auto object = clipboardApi->get();
-    if (object.contains("createAt")) {
-        checkTime = object.value("createAt").toString();
+
+    // 存储云端时间状态
+    if (object.contains("create_at")) {
+        QString latestTime = object.value("create_at").toString();
+
+        // 时间未变不更新
+        if (checkTime.compare(latestTime) == 0) {
+            return;
+        }
+
+        checkTime = latestTime;
     }
 
+    // 存储云端最新数据
     if (object.contains("mime")) {
+        // 获取数据类型
         QString mime = object.value("mime").toString();
-        QTextStream(stdout) << "Update:" <<  mime << "\n";
+        
+        QTextStream(stdout) << __FUNCTION__ << 
+            QString(": MineType = %1\n").arg(mime);
 
         if (object.value("mime").toString().compare("image") == 0) {
             auto data = object.value("data").toString().replace(" ", "+");
@@ -141,6 +173,7 @@ void MainWindow::onClipboardUpdate()
             if (checkData.compare(data) != 0) {
                 clipboard->setImage(Base64Image::formBase64(data));
             }
+
             return;
         }
 
@@ -153,7 +186,6 @@ void MainWindow::onClipboardUpdate()
             return;
         }
     }
-    
 }
 
 void MainWindow::onSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
