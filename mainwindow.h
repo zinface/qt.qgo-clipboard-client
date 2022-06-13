@@ -31,6 +31,7 @@ public slots:
 private:
     QClipboard *clipboard;
     ClipboardApi *clipboardApi;
+    QLabel *image;
     QLabel *previewLabel;
     QString checkTime;
     QString checkData;
@@ -38,9 +39,13 @@ private:
 
     QSystemTrayIcon *systray;
 
+
+    void updatePreviewImage(int w, int h);
+
 protected:
     void closeEvent(QCloseEvent *event);
     void hideEvent(QHideEvent *event);
+    void resizeEvent(QResizeEvent *event);
 
 };
 

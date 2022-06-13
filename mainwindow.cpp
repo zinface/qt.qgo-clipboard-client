@@ -18,6 +18,7 @@
 
 
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
+, image(new QLabel())
 , previewLabel(new QLabel(this))
 {
     clipboard = qApp->clipboard();
@@ -28,7 +29,9 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(clipboard, &QClipboard::dataChanged, this, &MainWindow::clipboardChanged);
 
     QHBoxLayout *layout = new QHBoxLayout(this);
+    layout->addStretch();
     layout->addWidget(previewLabel);
+    layout->addStretch();
 
     QAction *a_copy = new QAction("复制");
     QAction *a_copy_base64 = new QAction("复制为Base64");
@@ -103,9 +106,11 @@ void MainWindow::clipboardChanged()
 
     QTextStream(stdout) << __FUNCTION__ << 
         QString("Image: %1x%2\n").arg(imgW).arg(imgH);
-    previewLabel->setFixedWidth(imgW);
-    previewLabel->setFixedHeight(imgH);
-    previewLabel->setPixmap(QPixmap::fromImage(img));
+    image->setFixedWidth(imgW);
+    image->setFixedHeight(imgH);
+    image->setPixmap(QPixmap::fromImage(img));
+
+    updatePreviewImage(width(), height());
 
     clipboardApi->set("image", Base64Pixmap::fromImage(QPixmap::fromImage(img)));
     checkData = Base64Pixmap::fromImage(QPixmap::fromImage(img));
@@ -113,13 +118,13 @@ void MainWindow::clipboardChanged()
 
 void MainWindow::clipboardCopy()
 {
-    QPixmap pixmap = previewLabel->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
+    QPixmap pixmap = image->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
     clipboard->setPixmap(pixmap);
 }
 
 void MainWindow::clipboardCopyBase64()
 {
-    QPixmap pixmap = previewLabel->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
+    QPixmap pixmap = image->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
     clipboard->setText(Base64Pixmap::fromImage(pixmap));
 }
 
@@ -209,6 +214,24 @@ void MainWindow::onSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
     }
 }
 
+void MainWindow::updatePreviewImage(int w, int h)
+{
+    previewLabel->setMinimumSize(10, 10);
+    QPixmap imagePixmap = image->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
+    if (imagePixmap.isNull()) {
+        return;
+    }
+
+    QPixmap temp;
+    bool doScale = false;
+    if (imagePixmap.width() > w || imagePixmap.height() > h) {
+        temp = imagePixmap.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    } else {
+        temp = imagePixmap;
+    }
+    previewLabel->setPixmap(temp);
+}
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     if (systray->isVisible()) {
@@ -223,6 +246,14 @@ void MainWindow::hideEvent(QHideEvent *event)
         hide();
         event->ignore();
     }
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    int w = event->size().width();
+    int h = event->size().height();
+
+    updatePreviewImage(w, h);
 }
 
 
