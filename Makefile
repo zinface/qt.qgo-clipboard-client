@@ -73,3 +73,22 @@ ifeq ("vscode", "${TERM_PROGRAM}")
 edit-config:
 	code backend/config.h
 endif
+
+
+
+# 2. 在 Makefile 进行构建目标构建 Appimage 
+# Appimage 的构建流 --
+# 在 Makefile 进行构建目标构建 Appimage (要求提供工具的绝对路径，然后可依次进行linuxdeployqt, genrate-appimage)
+# 来自于 https://github.com/probonopd/linuxdeployqt 	的 linuxdeployqt
+# 来自于 https://github.com/AppImage/AppImageKit		的 appimagetool
+LINUXDEPLOYQT := "/home/zinface/Downloads/linuxdeployqt-continuous-x86_64.AppImage"
+APPIMAGETOOL  := "/home/zinface/Downloads/appimagetool-x86_64.AppImage"
+
+linuxdeploy: all
+	cd build && cmake .. -DLINUXDEPLOYQT=$(LINUXDEPLOYQT) -DAPPIMAGETOOL=$(APPIMAGETOOL)
+	cd build && make linuxdeploy
+
+genrate-appimage:
+	cd build && cmake .. -DLINUXDEPLOYQT=$(LINUXDEPLOYQT) -DAPPIMAGETOOL=$(APPIMAGETOOL)
+	cd build && make appimage
+
