@@ -6,6 +6,8 @@
 #include <QDesktopWidget>
 #include <QMainWindow>
 
+#include "config.h"
+
 void moveCenter(MainWindow &wm) {
     QDesktopWidget *desktop = QApplication::desktop();
     wm.move((desktop->width() - wm.width()) /2,(desktop->height() - wm.height()) /2);
@@ -19,5 +21,6 @@ int main(int argc, char *argv[])
     MainWindow wm;
     moveCenter(wm);
 
+    qDebug() << "[ClipBoard Server]: " << REMOTE_HOST;
     return a.exec();
 }
