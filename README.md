@@ -25,7 +25,19 @@
 
 ### 定义个人服务器服务地址
 
-- 修改路径定义文件 `backend/config.h`
+- 在使用 `cmake` 构建时，传递 `-DREMOTE_HOST=IP:PORT` 参数来初始化内部变量
+
+    ```shell
+    $ cmake -Bbuild -DREMOTE_HOST=10.10.10.10:9090
+    $ cmake --build build
+    $ ./build/qgo-clipboard-client
+
+    # 启动程序时，将会打印如下
+    [ClipBoard Server]:  http://10.10.10.10:9090
+    ```
+
+- ~~修改路径定义文件 `backend/config.h`~~(已过时)
+
     ```c
     #ifndef __CONFIG__H__
     #define __CONFIG__H__
