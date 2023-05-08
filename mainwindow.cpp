@@ -118,13 +118,21 @@ void MainWindow::clipboardChanged()
 
 void MainWindow::clipboardCopy()
 {
+#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
+    QPixmap pixmap = *image->pixmap();
+#else
     QPixmap pixmap = image->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
+#endif
     clipboard->setPixmap(pixmap);
 }
 
 void MainWindow::clipboardCopyBase64()
 {
+#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
+    QPixmap pixmap = *image->pixmap();
+#else
     QPixmap pixmap = image->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
+#endif
     clipboard->setText(Base64Pixmap::fromImage(pixmap));
 }
 
@@ -217,7 +225,11 @@ void MainWindow::onSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
 void MainWindow::updatePreviewImage(int w, int h)
 {
     previewLabel->setMinimumSize(10, 10);
+#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
+    QPixmap imagePixmap = *image->pixmap();
+#else
     QPixmap imagePixmap = image->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
+#endif
     if (imagePixmap.isNull()) {
         return;
     }
