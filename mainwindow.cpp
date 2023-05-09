@@ -90,10 +90,16 @@ void MainWindow::clipboardChanged()
             return;
         }
         {
-            QFileInfo f(text);
+            bool uri = false;
+            QString filePath = text;
+            if (text.startsWith("file://")) {
+                filePath = QUrl(text).toLocalFile();
+            }
+            QFileInfo f(filePath);
             int max = 1     * 1024 * 1024 * 5;
             //        ^byte   ^k     ^m
-            if (f.exists(text) && f.isFile() && f.size() < max) {
+            if (f.exists(filePath) && f.isFile() && f.size() < max) {
+
                 QString mime = QString("file/%1").arg(f.fileName());
                 if (mime.compare(checkData) == 0) return;
 
