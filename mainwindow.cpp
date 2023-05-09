@@ -1,5 +1,7 @@
 
 #include "mainwindow.h"
+#include "ui_mainwindow.h"
+
 #include <QClipboard>
 #include <QApplication>
 #include <QImage>

@@ -13,6 +13,9 @@ class ClipboardApi;
 class QSystemTrayIcon;
 QT_END_NAMESPACE
 
+namespace Ui {
+    class MainWindow;
+};
 class MainWindow : public QWidget
 {
     Q_OBJECT

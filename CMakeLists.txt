@@ -25,6 +25,7 @@ set(QRC_SOURCES "sources.qrc")
 
 add_executable(${PROJECT_NAME} "main.cpp"
     "mainwindow.cpp" "mainwindow.h" 
+    "mainwindow.ui"
     ${QRC_SOURCES}
 
     backend/clipboardApi.cpp
