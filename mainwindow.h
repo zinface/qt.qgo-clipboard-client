@@ -36,6 +36,7 @@ private:
     ClipboardType currentType = Text;
     QTemporaryFile tempFile;
     QTemporaryDir tempDir;
+    bool openTempDir = true;
 
 public slots:
     void clipboardChanged();

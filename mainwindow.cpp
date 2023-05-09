@@ -19,6 +19,7 @@
 #include <QCloseEvent>
 #include <QFileInfo>
 #include <QMimeData>
+#include <QDesktopServices>
 
 
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
@@ -55,10 +56,18 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(showWindow, SIGNAL(triggered()), this, SLOT(show()));
     QAction *quitAction = new QAction("退出");
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+    QAction *autoOpenTempDirAction = new QAction("关闭自动打开目录");
+    connect(autoOpenTempDirAction, &QAction::triggered, this, [=](){
+        openTempDir = !openTempDir;
+        autoOpenTempDirAction->setText(
+            openTempDir?"关闭自动打开目录":"自动打开目录"
+        );
+    });
 
     QMenu *menu = new QMenu();
     menu->addAction(a_copy);
     menu->addAction(a_copy_base64);
+    menu->addAction(autoOpenTempDirAction);
     menu->addAction(showWindow);
     menu->addAction(quitAction);
     
@@ -111,7 +120,7 @@ void MainWindow::clipboardChanged()
 
 
                 clipboardApi->set(mime, Base64ByteArray::fromByteArray(byteArray));
-                updateShowText(QString("%1/size:%2").arg(mime).arg(f.size()));
+                updateShowText(QString("(%1)(%2)\n(%3)").arg(f.fileName()).arg(f.size()).arg(mime));
                 currentType = File;
                 checkData = mime;
                 return;
@@ -244,6 +253,11 @@ void MainWindow::onClipboardUpdate()
 
             if (checkData.compare(Base64ByteArray::fromBase64(data)) != 0) {
                 QString filePath = tempDir.filePath(fileName);
+                qDebug() << "filePath:" << filePath;
+
+                if (openTempDir) {
+                    QDesktopServices::openUrl(QUrl(tempDir.path()));
+                }
 
                 QFile file(filePath);
                 file.open(QIODevice::WriteOnly);
@@ -256,7 +270,7 @@ void MainWindow::onClipboardUpdate()
                 mimeData->setData("text/uri-list", filePath.toUtf8());
                 clipboard->setMimeData(mimeData);
 
-                updateShowText(QString("%1/size:%2").arg(mime).arg(f.size()));
+                updateShowText(QString("(%1)(%2)\n(%3)").arg(fileName).arg(f.size()).arg(filePath));
             }
             return;
         }
