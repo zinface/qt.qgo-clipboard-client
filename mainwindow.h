@@ -23,6 +23,9 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private:
+    Ui::MainWindow *ui;
+
 public slots:
     void clipboardChanged();
     void clipboardCopy();

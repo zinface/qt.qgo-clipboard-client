@@ -20,9 +20,11 @@
 
 
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
+,ui(new Ui::MainWindow)
 , image(new QLabel())
 , previewLabel(new QLabel(this))
 {
+    ui->setupUi(this);
     clipboard = qApp->clipboard();
     clipboardApi = new ClipboardApi;
     systray = new QSystemTrayIcon(this);
