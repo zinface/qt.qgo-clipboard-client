@@ -46,4 +46,15 @@ public:
     }
 };
 
+class Base64ByteArray {
+public:
+    static QByteArray fromBase64(QString base64) {
+        return QByteArray::fromBase64(base64.toLocal8Bit());
+    }
+
+    static QString fromByteArray(QByteArray byteArray) {
+        return byteArray.toBase64();
+    }
+};
+
 #endif  //!__BASE64IMAGE__H__

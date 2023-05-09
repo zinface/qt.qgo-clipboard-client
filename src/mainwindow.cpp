@@ -1,5 +1,7 @@
 
 #include "mainwindow.h"
+#include "ui_mainwindow.h"
+
 #include <QClipboard>
 #include <QApplication>
 #include <QImage>
@@ -15,12 +17,17 @@
 #include <QTimer>
 #include <QSystemTrayIcon>
 #include <QCloseEvent>
+#include <QFileInfo>
+#include <QMimeData>
+#include <QDesktopServices>
 
 
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
+,ui(new Ui::MainWindow)
 , image(new QLabel())
-, previewLabel(new QLabel(this))
 {
+    ui->setupUi(this);
+    setWindowTitle("云剪贴板(基于Qt) - v0.1");
     clipboard = qApp->clipboard();
     clipboardApi = new ClipboardApi;
     systray = new QSystemTrayIcon(this);
@@ -28,19 +35,15 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 
     connect(clipboard, &QClipboard::dataChanged, this, &MainWindow::clipboardChanged);
 
-    QHBoxLayout *layout = new QHBoxLayout(this);
-    layout->addStretch();
-    layout->addWidget(previewLabel);
-    layout->addStretch();
 
     QAction *a_copy = new QAction("复制");
     QAction *a_copy_base64 = new QAction("复制为Base64");
     connect(a_copy, &QAction::triggered, this, &MainWindow::clipboardCopy);
     connect(a_copy_base64, &QAction::triggered, this, &MainWindow::clipboardCopyBase64);
 
-    previewLabel->addAction(a_copy);
-    previewLabel->addAction(a_copy_base64);
-    previewLabel->setContextMenuPolicy(Qt::ContextMenuPolicy::ActionsContextMenu);
+    ui->label->addAction(a_copy);
+    ui->label->addAction(a_copy_base64);
+    ui->label->setContextMenuPolicy(Qt::ContextMenuPolicy::ActionsContextMenu);
 
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainWindow::onClipboardCheckLatest);
@@ -53,10 +56,18 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
     connect(showWindow, SIGNAL(triggered()), this, SLOT(show()));
     QAction *quitAction = new QAction("退出");
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+    QAction *autoOpenTempDirAction = new QAction("关闭自动打开目录");
+    connect(autoOpenTempDirAction, &QAction::triggered, this, [=](){
+        openTempDir = !openTempDir;
+        autoOpenTempDirAction->setText(
+            openTempDir?"关闭自动打开目录":"自动打开目录"
+        );
+    });
 
     QMenu *menu = new QMenu();
     menu->addAction(a_copy);
     menu->addAction(a_copy_base64);
+    menu->addAction(autoOpenTempDirAction);
     menu->addAction(showWindow);
     menu->addAction(quitAction);
     
@@ -88,8 +99,37 @@ void MainWindow::clipboardChanged()
         if (text.compare(checkData) == 0) {
             return;
         }
+        {
+            bool uri = false;
+            QString filePath = text;
+            if (text.startsWith("file://")) {
+                filePath = QUrl(text).toLocalFile();
+            }
+            QFileInfo f(filePath);
+            int max = 1     * 1024 * 1024 * 5;
+            //        ^byte   ^k     ^m
+            if (f.exists(filePath) && f.isFile() && f.size() < max) {
+
+                QString mime = QString("file/%1").arg(f.fileName());
+                if (mime.compare(checkData) == 0) return;
+
+                QFile file(f.absoluteFilePath());
+                file.open(QIODevice::ReadOnly);
+                auto byteArray = file.readAll();
+                file.close();
+
+
+                clipboardApi->set(mime, Base64ByteArray::fromByteArray(byteArray));
+                updateShowText(QString("(%1)(%2)\n(%3)").arg(f.fileName()).arg(f.size()).arg(mime));
+                currentType = File;
+                checkData = mime;
+                return;
+            }
+        }
         checkData = text;
         clipboardApi->set("text", Base64Text::fromText(text));
+        updateShowText(text);
+
         return;
     }
 
@@ -118,13 +158,21 @@ void MainWindow::clipboardChanged()
 
 void MainWindow::clipboardCopy()
 {
+#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
+    QPixmap pixmap = *image->pixmap();
+#else
     QPixmap pixmap = image->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
+#endif
     clipboard->setPixmap(pixmap);
 }
 
 void MainWindow::clipboardCopyBase64()
 {
+#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
+    QPixmap pixmap = *image->pixmap();
+#else
     QPixmap pixmap = image->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
+#endif
     clipboard->setText(Base64Pixmap::fromImage(pixmap));
 }
 
@@ -187,6 +235,42 @@ void MainWindow::onClipboardUpdate()
             QTextStream(stdout) << "Update:" << data << " -> " << Base64Text::fromBase64(data) << "\n";
             if (checkData.compare(Base64Text::fromBase64(data)) != 0) {
                 clipboard->setText(Base64Text::fromBase64(data));
+                updateShowText(Base64Text::fromBase64(data));
+            }
+            return;
+        }
+
+        if (object.value("mime").toString().startsWith("file/")) {
+            auto data = object.value("data").toString().replace(" ", "+");
+            QTextStream(stdout) << "Update:" << mime << "\n";
+
+            QString fileName = mime.split("/").at(1);
+
+            QString clipText = clipboard->text();
+            if (clipText.contains(fileName)) {
+                return;
+            }
+
+            if (checkData.compare(Base64ByteArray::fromBase64(data)) != 0) {
+                QString filePath = tempDir.filePath(fileName);
+                qDebug() << "filePath:" << filePath;
+
+                if (openTempDir) {
+                    QDesktopServices::openUrl(QUrl(tempDir.path()));
+                }
+
+                QFile file(filePath);
+                file.open(QIODevice::WriteOnly);
+                file.write(Base64ByteArray::fromBase64(data));
+                file.close();
+
+                QFileInfo f(filePath);
+
+                auto mimeData = new QMimeData();
+                mimeData->setData("text/uri-list", filePath.toUtf8());
+                clipboard->setMimeData(mimeData);
+
+                updateShowText(QString("(%1)(%2)\n(%3)").arg(fileName).arg(f.size()).arg(filePath));
             }
             return;
         }
@@ -214,10 +298,20 @@ void MainWindow::onSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
     }
 }
 
+void MainWindow::updateShowText(QString text)
+{
+    ui->label->setText(text);
+    currentType = Text;
+}
+
 void MainWindow::updatePreviewImage(int w, int h)
 {
-    previewLabel->setMinimumSize(10, 10);
+    ui->label->setMinimumSize(10, 10);
+#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
+    QPixmap imagePixmap = *image->pixmap();
+#else
     QPixmap imagePixmap = image->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
+#endif
     if (imagePixmap.isNull()) {
         return;
     }
@@ -229,7 +323,9 @@ void MainWindow::updatePreviewImage(int w, int h)
     } else {
         temp = imagePixmap;
     }
-    previewLabel->setPixmap(temp);
+    ui->label->setPixmap(temp);
+    ui->label->setAlignment(Qt::AlignmentFlag::AlignCenter);
+    currentType = Image;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -253,7 +349,8 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     int w = event->size().width();
     int h = event->size().height();
 
-    updatePreviewImage(w, h);
+    if (currentType == Image)
+        updatePreviewImage(w, h);
 }
 
 

@@ -5,6 +5,8 @@
 #include <QMainWindow>
 #include <QWidget>
 #include <QSystemTrayIcon>
+#include <QTemporaryFile>
+#include <QTemporaryDir>
 
 QT_BEGIN_NAMESPACE
 class QClipboard;
@@ -13,12 +15,28 @@ class ClipboardApi;
 class QSystemTrayIcon;
 QT_END_NAMESPACE
 
+namespace Ui {
+    class MainWindow;
+};
 class MainWindow : public QWidget
 {
     Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+    enum ClipboardType {
+        Image,
+        Text,
+        File,
+    };
+
+private:
+    Ui::MainWindow *ui;
+    ClipboardType currentType = Text;
+    QTemporaryFile tempFile;
+    QTemporaryDir tempDir;
+    bool openTempDir = true;
 
 public slots:
     void clipboardChanged();
@@ -32,7 +50,6 @@ private:
     QClipboard *clipboard;
     ClipboardApi *clipboardApi;
     QLabel *image;
-    QLabel *previewLabel;
     QString checkTime;
     QString checkData;
     QString checkMime;
@@ -40,6 +57,7 @@ private:
     QSystemTrayIcon *systray;
 
 
+    void updateShowText(QString text);
     void updatePreviewImage(int w, int h);
 
 protected:
