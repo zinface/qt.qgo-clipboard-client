@@ -5,6 +5,8 @@
 #include <QMainWindow>
 #include <QWidget>
 #include <QSystemTrayIcon>
+#include <QTemporaryFile>
+#include <QTemporaryDir>
 
 QT_BEGIN_NAMESPACE
 class QClipboard;
@@ -26,11 +28,14 @@ public:
     enum ClipboardType {
         Image,
         Text,
+        File,
     };
 
 private:
     Ui::MainWindow *ui;
     ClipboardType currentType = Text;
+    QTemporaryFile tempFile;
+    QTemporaryDir tempDir;
 
 public slots:
     void clipboardChanged();

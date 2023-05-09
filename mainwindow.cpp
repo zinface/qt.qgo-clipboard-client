@@ -17,6 +17,8 @@
 #include <QTimer>
 #include <QSystemTrayIcon>
 #include <QCloseEvent>
+#include <QFileInfo>
+#include <QMimeData>
 
 
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
@@ -87,9 +89,31 @@ void MainWindow::clipboardChanged()
         if (text.compare(checkData) == 0) {
             return;
         }
+        {
+            QFileInfo f(text);
+            int max = 1     * 1024 * 1024 * 5;
+            //        ^byte   ^k     ^m
+            if (f.exists(text) && f.isFile() && f.size() < max) {
+                QString mime = QString("file/%1").arg(f.fileName());
+                if (mime.compare(checkData) == 0) return;
+
+                QFile file(f.absoluteFilePath());
+                file.open(QIODevice::ReadOnly);
+                auto byteArray = file.readAll();
+                file.close();
+
+
+                clipboardApi->set(mime, Base64ByteArray::fromByteArray(byteArray));
+                updateShowText(QString("%1/size:%2").arg(mime).arg(f.size()));
+                currentType = File;
+                checkData = mime;
+                return;
+            }
+        }
         checkData = text;
         clipboardApi->set("text", Base64Text::fromText(text));
         updateShowText(text);
+
         return;
     }
 
@@ -196,6 +220,36 @@ void MainWindow::onClipboardUpdate()
             if (checkData.compare(Base64Text::fromBase64(data)) != 0) {
                 clipboard->setText(Base64Text::fromBase64(data));
                 updateShowText(Base64Text::fromBase64(data));
+            }
+            return;
+        }
+
+        if (object.value("mime").toString().startsWith("file/")) {
+            auto data = object.value("data").toString().replace(" ", "+");
+            QTextStream(stdout) << "Update:" << mime << "\n";
+
+            QString fileName = mime.split("/").at(1);
+
+            QString clipText = clipboard->text();
+            if (clipText.contains(fileName)) {
+                return;
+            }
+
+            if (checkData.compare(Base64ByteArray::fromBase64(data)) != 0) {
+                QString filePath = tempDir.filePath(fileName);
+
+                QFile file(filePath);
+                file.open(QIODevice::WriteOnly);
+                file.write(Base64ByteArray::fromBase64(data));
+                file.close();
+
+                QFileInfo f(filePath);
+
+                auto mimeData = new QMimeData();
+                mimeData->setData("text/uri-list", filePath.toUtf8());
+                clipboard->setMimeData(mimeData);
+
+                updateShowText(QString("%1/size:%2").arg(mime).arg(f.size()));
             }
             return;
         }
