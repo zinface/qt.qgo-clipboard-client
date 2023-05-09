@@ -22,7 +22,6 @@
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 ,ui(new Ui::MainWindow)
 , image(new QLabel())
-, previewLabel(new QLabel(this))
 {
     ui->setupUi(this);
     clipboard = qApp->clipboard();
@@ -32,19 +31,15 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
 
     connect(clipboard, &QClipboard::dataChanged, this, &MainWindow::clipboardChanged);
 
-    QHBoxLayout *layout = new QHBoxLayout(this);
-    layout->addStretch();
-    layout->addWidget(previewLabel);
-    layout->addStretch();
 
     QAction *a_copy = new QAction("复制");
     QAction *a_copy_base64 = new QAction("复制为Base64");
     connect(a_copy, &QAction::triggered, this, &MainWindow::clipboardCopy);
     connect(a_copy_base64, &QAction::triggered, this, &MainWindow::clipboardCopyBase64);
 
-    previewLabel->addAction(a_copy);
-    previewLabel->addAction(a_copy_base64);
-    previewLabel->setContextMenuPolicy(Qt::ContextMenuPolicy::ActionsContextMenu);
+    ui->label->addAction(a_copy);
+    ui->label->addAction(a_copy_base64);
+    ui->label->setContextMenuPolicy(Qt::ContextMenuPolicy::ActionsContextMenu);
 
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainWindow::onClipboardCheckLatest);
@@ -94,6 +89,7 @@ void MainWindow::clipboardChanged()
         }
         checkData = text;
         clipboardApi->set("text", Base64Text::fromText(text));
+        updateShowText(text);
         return;
     }
 
@@ -199,6 +195,7 @@ void MainWindow::onClipboardUpdate()
             QTextStream(stdout) << "Update:" << data << " -> " << Base64Text::fromBase64(data) << "\n";
             if (checkData.compare(Base64Text::fromBase64(data)) != 0) {
                 clipboard->setText(Base64Text::fromBase64(data));
+                updateShowText(Base64Text::fromBase64(data));
             }
             return;
         }
@@ -226,9 +223,15 @@ void MainWindow::onSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
     }
 }
 
+void MainWindow::updateShowText(QString text)
+{
+    ui->label->setText(text);
+    currentType = Text;
+}
+
 void MainWindow::updatePreviewImage(int w, int h)
 {
-    previewLabel->setMinimumSize(10, 10);
+    ui->label->setMinimumSize(10, 10);
 #if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
     QPixmap imagePixmap = *image->pixmap();
 #else
@@ -245,7 +248,9 @@ void MainWindow::updatePreviewImage(int w, int h)
     } else {
         temp = imagePixmap;
     }
-    previewLabel->setPixmap(temp);
+    ui->label->setPixmap(temp);
+    ui->label->setAlignment(Qt::AlignmentFlag::AlignCenter);
+    currentType = Image;
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -269,7 +274,8 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     int w = event->size().width();
     int h = event->size().height();
 
-    updatePreviewImage(w, h);
+    if (currentType == Image)
+        updatePreviewImage(w, h);
 }
 
 

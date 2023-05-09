@@ -23,8 +23,14 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    enum ClipboardType {
+        Image,
+        Text,
+    };
+
 private:
     Ui::MainWindow *ui;
+    ClipboardType currentType = Text;
 
 public slots:
     void clipboardChanged();
@@ -38,7 +44,6 @@ private:
     QClipboard *clipboard;
     ClipboardApi *clipboardApi;
     QLabel *image;
-    QLabel *previewLabel;
     QString checkTime;
     QString checkData;
     QString checkMime;
@@ -46,6 +51,7 @@ private:
     QSystemTrayIcon *systray;
 
 
+    void updateShowText(QString text);
     void updatePreviewImage(int w, int h);
 
 protected:
