@@ -26,13 +26,21 @@ include(cmake/SparkBuildGraphviz.cmake)
 include(cmake/SparkDesktopMacros.cmake)
 # 内容默认应用名称: Name= 应与项目名称相同
 spark_desktop_macros(
-    "${PROJECT_NAME}" # 应用名称: Name=
-    "云剪贴板(基于Qt的客户端)" # 应用名称: Name[zh_CN]=
-    "用于简单的使用共享剪贴板" # 应用说明: Comment=
-    "Application" # 应用类型: Type=
-    "qgo-clipboard-client" # 执行程序: Exec=
-    "/usr/share/${PROJECT_NAME}/icon.png" # 图标路径: Icon=
-    "Development" # 应用分类: Category=
+    # 应用名称: Name=
+    "${PROJECT_NAME}" 
+    # 应用名称: Name[zh_CN]=
+    "云剪贴板(基于Qt的客户端)" 
+    # 应用说明: Comment=
+    "用于简单的使用共享剪贴板"
+    # 应用类型: Type=
+    "Application"
+    # 执行程序: Exec=
+    "qgo-clipboard-client"
+    # 图标路径: Icon=
+    "/usr/share/${PROJECT_NAME}/icon.png"
+    # 应用分类: Category=
+    "Development"
+
 )
 install(FILES ${SPARK_DESKTOP}
     DESTINATION "/usr/share/applications")
@@ -50,4 +58,4 @@ add_package_descript(cmake/package-deb.descript)
 include(cmake/SparkAppimageConfig.cmake)  # 导入来自 Spark 构建的 Appimage 构建
 add_appimage_icon(assets/icon.png)       # 添加到 Appimage 中的默认的图标
 add_appimage_desktop()                    # 添加到 Appimage 中的默认desktop(使用来自 Spark 构建的 Desktop 构建中配置的信息(必须要求 spark-desktop))
-add_appimage()                            # 应用对 Appimage 的构建
+add_appimage_target(${PROJECT_NAME})      # 添加到 Appimage 中的默认目标，应用对 Appimage 的构建

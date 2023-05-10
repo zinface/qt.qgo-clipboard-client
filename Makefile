@@ -76,15 +76,22 @@ endif
 
 
 
-# 2. 在 Makefile 进行构建目标构建 Appimage 
-# Appimage 的构建流 --
+# 2. 在 Makefile 进行构建目标构建 Appimage 的构建流 --
 # 在 Makefile 进行构建目标构建 Appimage (要求提供工具的绝对路径，然后可依次进行linuxdeployqt, genrate-appimage)
 # 来自于 https://github.com/probonopd/linuxdeployqt 	的 linuxdeployqt
 # 来自于 https://github.com/AppImage/AppImageKit		的 appimagetool
-LINUXDEPLOYQT := "/home/zinface/Downloads/linuxdeployqt-continuous-x86_64.AppImage"
-APPIMAGETOOL  := "/home/zinface/Downloads/appimagetool-x86_64.AppImage"
+# 来自于 https://gitlink.org.cn/zinface/bundle-linuxdeployqt.git  托管存储的工具
 
-linuxdeploy: all
+# 或指定你所想存放克隆项目的位置
+BUNDLE_LINUXDEPLOYQT := $(shell pwd)/build/bundle-linuxdeployqt
+
+download-bundle-linuxdeploytools:
+	-git clone https://gitlink.org.cn/zinface/bundle-linuxdeployqt.git $(BUNDLE_LINUXDEPLOYQT)
+
+LINUXDEPLOYQT := "$(BUNDLE_LINUXDEPLOYQT)/linuxdeployqt-continuous-x86_64.AppImage"
+APPIMAGETOOL  := "$(BUNDLE_LINUXDEPLOYQT)/appimagetool-x86_64.AppImage"
+
+linuxdeploy: release download-bundle-linuxdeploytools
 	cd build && cmake .. -DLINUXDEPLOYQT=$(LINUXDEPLOYQT) -DAPPIMAGETOOL=$(APPIMAGETOOL)
 	cd build && make linuxdeploy
 
