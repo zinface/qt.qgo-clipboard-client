@@ -9,6 +9,12 @@ include(cmake/SparkFindLibraries.cmake)
 include(cmake/SparkFindQt5Config.cmake)
 # include(cmake/SparkFindQt6Config.cmake)
 
+if(NOT DEFINED REMOTE_HOST)
+    set(REMOTE_HOST "http://127.0.0.1:9090")
+endif(NOT DEFINED REMOTE_HOST)
+
+configure_file(backend/config.h.in config.h @ONLY)
+
 # 资源文件路径
 set(QRC_SOURCES "assets/sources.qrc")
 
