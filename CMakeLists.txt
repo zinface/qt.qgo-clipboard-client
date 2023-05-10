@@ -7,7 +7,7 @@ include(cmake/SparkEnvConfig.cmake)
 include(cmake/SparkMacrosConfig.cmake)
 include(cmake/SparkFindLibraries.cmake)
 include(cmake/SparkFindQt5Config.cmake)
-include(cmake/SparkFindQt6Config.cmake)
+# include(cmake/SparkFindQt6Config.cmake)
 
 # 资源文件路径
 set(QRC_SOURCES "assets/sources.qrc")
