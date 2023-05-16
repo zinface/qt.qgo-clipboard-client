@@ -1,16 +1,16 @@
 
 macro(spark_desktop_macros _APP_NAME _APP_NAME_ZH_CN _APP_COMMENT _APP_TYPE _APP_EXECUTE_PATH _APP_EXECUTE_ICON_PATH _APP_CATEGORIES)
-    set(APP_NAME ${_APP_NAME})
-    set(APP_NAME_ZH_CN ${_APP_NAME_ZH_CN})
-    set(APP_COMMENT ${_APP_COMMENT})
-    set(APP_TYPE ${_APP_TYPE})
-    set(APP_EXECUTE_PATH ${_APP_EXECUTE_PATH})
-    set(APP_EXECUTE_ICON_PATH ${_APP_EXECUTE_ICON_PATH})
-    set(APP_CATEGORIES ${_APP_CATEGORIES})
+    set(APP_NAME                ${_APP_NAME})
+    set(APP_NAME_ZH_CN          ${_APP_NAME_ZH_CN})
+    set(APP_COMMENT             ${_APP_COMMENT})
+    set(APP_TYPE                ${_APP_TYPE})
+    set(APP_EXECUTE_PATH        ${_APP_EXECUTE_PATH})
+    set(APP_EXECUTE_ICON_PATH   ${_APP_EXECUTE_ICON_PATH})
+    set(APP_CATEGORIES          ${_APP_CATEGORIES})
     configure_file(cmake/spark-desktop.desktop.in
         ${CMAKE_BINARY_DIR}/${_APP_NAME}.desktop
     )
-    set(SPARK_DESKTOP "${CMAKE_BINARY_DIR}/${APP_NAME}.desktop")
+    set(SPARK_DESKTOP_FILE ${CMAKE_BINARY_DIR}/${_APP_NAME}.desktop)
 endmacro(spark_desktop_macros _APP_NAME _APP_NAME_ZH_CN _APP_COMMENT _APP_TYPE _APP_EXECUTE_PATH _APP_EXECUTE_ICON_PATH _APP_CATEGORIES)
 
 # include(cmake/SparkDesktopMacros.cmake)
@@ -25,12 +25,23 @@ endmacro(spark_desktop_macros _APP_NAME _APP_NAME_ZH_CN _APP_COMMENT _APP_TYPE _
     # 应用分类: Category=
 # )
 
+# TODO 安装位置：INSTALL(将自动实现 install 文件，如 /usr/share/applications)
+
+# install(FILES ${APP_NAME}.desktop
+#     DESTINATION /usr/share/applications
+# )
+    # 或者
+# install(FILES ${SPARK_DESKTOP_FILE}
+#     DESTINATION /usr/share/applications
+# )
+
+# 基于 configure_file 填充内容配置
 # configure_file(<input> <output>
 #                [NO_SOURCE_PERMISSIONS | USE_SOURCE_PERMISSIONS |
 #                 FILE_PERMISSIONS <permissions>...]
 #                [COPYONLY] [ESCAPE_QUOTES] [@ONLY]
 #                [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
 
-# install(FILES ${APP_NAME}.desktop
+# install(FILES ${SPARK_DESKTOP_FILE}.desktop
 #     DESTINATION /usr/share/applications
 # )

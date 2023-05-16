@@ -48,7 +48,7 @@ spark_desktop_macros(
     "Development"
 
 )
-install(FILES ${SPARK_DESKTOP}
+install(FILES ${SPARK_DESKTOP_FILE}
     DESTINATION "/usr/share/applications")
 install(FILES assets/icon.png 
         DESTINATION "/usr/share/${PROJECT_NAME}")
