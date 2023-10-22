@@ -21,8 +21,10 @@
 #include <QMimeData>
 #include <QDesktopServices>
 
+#include "configdialog.h"
 
-MainWindow::MainWindow(QWidget *parent) : QWidget(parent)
+
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 ,ui(new Ui::MainWindow)
 , image(new QLabel())
 {
@@ -370,3 +372,11 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 // bool    supportsSelection() const
 // QString    text(QClipboard::Mode mode = Clipboard) const
 // QString    text(QString &subtype, QClipboard::Mode mode = Clipboard) const
+
+void MainWindow::on_action_setting_config_triggered()
+{
+    ConfigDialog dialog;
+    dialog.setWindowTitle("设置服务器地址");
+    dialog.exec();
+}
+

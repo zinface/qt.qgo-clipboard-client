@@ -18,7 +18,7 @@ QT_END_NAMESPACE
 namespace Ui {
     class MainWindow;
 };
-class MainWindow : public QWidget
+class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
@@ -65,6 +65,8 @@ protected:
     void hideEvent(QHideEvent *event);
     void resizeEvent(QResizeEvent *event);
 
+private slots:
+    void on_action_setting_config_triggered();
 };
 
 

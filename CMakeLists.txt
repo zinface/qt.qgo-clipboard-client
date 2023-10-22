@@ -8,23 +8,28 @@ include(cmake/SparkMacrosConfig.cmake)
 include(cmake/SparkFindLibraries.cmake)
 include(cmake/SparkFindQt5Config.cmake)
 # include(cmake/SparkFindQt6Config.cmake)
+include(cmake/SparkMacrosExtendConfig.cmake)
 
 if(NOT DEFINED REMOTE_HOST)
     set(REMOTE_HOST "http://127.0.0.1:9090")
 endif(NOT DEFINED REMOTE_HOST)
 
-configure_file(backend/config.h.in config.h @ONLY)
+configure_file(src/global/config.h.in config.h @ONLY)
 
 # 资源文件路径
 set(QRC_SOURCES "assets/sources.qrc")
 
-spark_add_library_path(BackendApi backend)
-target_link_qt5(BackendApi)
+spark_add_library_realpaths(
+    src/utils
+    src/global+utils
+    src/view+utils+global
+    src/backend+view
+)
 
 spark_add_executable_path(${PROJECT_NAME} src
     ${QRC_SOURCES}
 )
-target_link_BackendApi(${PROJECT_NAME})
+target_link_backend(${PROJECT_NAME})
 
 include(cmake/SparkBuildGraphviz.cmake)
 

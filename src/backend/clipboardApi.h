@@ -7,7 +7,7 @@
 #include <QJsonArray>
 #include <QJsonValue>
 #include "httprequest.h"
-#include "config.h"
+#include "global/config.h"
 
 class ClipboardApi : public QObject {
     Q_OBJECT
