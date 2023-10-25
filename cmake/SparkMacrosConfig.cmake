@@ -2,6 +2,48 @@ cmake_minimum_required(VERSION 3.5.1)
 
 # 定义一些 macro 用于自动生成构建结构
 
+# spark_aux_source_directory outvar invar [skip]
+# 获取目录下的所有源代码
+macro(spark_aux_source_directory OUTVAR INVAR)
+    # iv: internal_variable
+    set(iv_args ${ARGN})
+    list(LENGTH iv_args iv_arglen)
+    
+    file(GLOB iv_SOURCE_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${INVAR}/*.c ${INVAR}/*.cpp)
+    file(GLOB iv_HEADER_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${INVAR}/*.h ${INVAR}/*.hpp)
+    file(GLOB iv_QT_UI_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${INVAR}/*.ui )
+
+    if(iv_arglen EQUAL 1)
+        list(APPEND ${OUTVAR} ${iv_SOURCE_LIST} ${iv_HEADER_LIST} ${iv_QT_UI_LIST})
+    else()
+        set(${OUTVAR} ${iv_SOURCE_LIST} ${iv_HEADER_LIST} ${iv_QT_UI_LIST})
+    endif(iv_arglen EQUAL 1)
+
+    unset(iv_args)
+    unset(iv_arglen)
+    unset(iv_SOURCE_LIST)
+    unset(iv_HEADER_LIST)
+    unset(iv_QT_UI_LIST)
+
+endmacro(spark_aux_source_directory OUTVAR INVAR)
+
+# spark_aux_source_directories outvar invar [...]
+# 获取目录列表下的所有源代码
+    # spark_aux_source_directory 的扩展，支持多个 invar 与追加参数
+macro(spark_aux_source_directories OUTVAR INVAR)
+    set(iv_aux_directories ${ARGN})
+    
+    spark_aux_source_directory(${OUTVAR} ${INVAR})
+
+    foreach(iv_directory IN LISTS iv_aux_directories)
+        spark_aux_source_directory(${OUTVAR} ${iv_directory} SKIP)
+    endforeach(iv_directory IN LISTS iv_aux_directories)
+
+    unset(iv_aux_directories)
+
+endmacro(spark_aux_source_directories OUTVAR INVAR)
+
+
 # spark_add_library <lib_name> [files]...
 # 构建一个库，基于指定的源文件
     # 并根据库名生成 target_link_<lib_name> 函数
@@ -42,9 +84,11 @@ macro(spark_add_library_path _lib_name _lib_path)
     aux_source_directory(${${_lib_name}_SOURCE_PATH} ${_lib_name}_SOURCES)
 
     # message("================ spark_add_library_path: ${_lib_name} ================")
-    file(GLOB QT_UI_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${${_lib_name}_SOURCE_PATH}/*.ui)
-    file(GLOB HEADER_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${${_lib_name}_SOURCE_PATH}/*.h ${${_lib_name}_SOURCE_PATH}/*.hpp)
-    add_library(${_lib_name} ${${_lib_name}_TYPE} ${${_lib_name}_SOURCES} ${QT_UI_LIST} ${HEADER_LIST})
+    # file(GLOB QT_UI_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${${_lib_name}_SOURCE_PATH}/*.ui)
+    # file(GLOB HEADER_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${${_lib_name}_SOURCE_PATH}/*.h ${${_lib_name}_SOURCE_PATH}/*.hpp)
+    spark_aux_source_directory(any_list ${${_lib_name}_SOURCE_PATH})
+    # add_library(${_lib_name} ${${_lib_name}_TYPE} ${${_lib_name}_SOURCES} ${QT_UI_LIST} ${HEADER_LIST})
+    add_library(${_lib_name} ${${_lib_name}_TYPE} ${${_lib_name}_SOURCES} ${any_list})
     spark_debug_message("${_lib_name}_SOURCES: ${${_lib_name}_SOURCES}, ${${_lib_name}_SOURCE_PATH} ${QT_UI_LIST} ${HEADER_LIST}")
     foreach(item IN LISTS ${_lib_name}_SOURCES)
         spark_debug_message(" -> ${item}")
@@ -98,8 +142,11 @@ macro(spark_add_executable_path _exec_name _exec_path)
     aux_source_directory(${_exec_path} ${_exec_name}_SOURCES)
 
     spark_debug_message("================ ${_exec_name} Executable ================")
-    file(GLOB UI_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${_exec_path}/*.ui)
-    add_executable(${_exec_name} ${${_exec_name}_SOURCES} ${ARGN} ${UI_LIST})
+    # file(GLOB QT_UI_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${_exec_path}/*.ui)
+    # file(GLOB HEADER_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${_exec_path}/*.h ${_exec_path}/*.hpp)
+    spark_aux_source_directory(any_list ${_exec_path})
+    # add_executable(${_exec_name} ${${_exec_name}_SOURCES} ${ARGN} ${QT_UI_LIST} ${HEADER_LIST})
+    add_executable(${_exec_name} ${${_exec_name}_SOURCES} ${ARGN} ${any_list})
     foreach(item IN LISTS ${_exec_name}_SOURCES)
         spark_debug_message(" -> ${item}")
     endforeach(item IN LISTS ${_exec_name}_SOURCES)

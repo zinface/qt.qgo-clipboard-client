@@ -21,7 +21,7 @@
 #include <QMimeData>
 #include <QDesktopServices>
 
-#include "configdialog.h"
+#include "view/configdialog.h"
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)

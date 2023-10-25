@@ -1,5 +1,5 @@
 #include "configdialog.h"
-#include "global.h"
+#include "global/global.h"
 #include "ui_configdialog.h"
 
 ConfigDialog::ConfigDialog(QWidget *parent) :

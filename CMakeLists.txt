@@ -19,17 +19,17 @@ configure_file(src/global/config.h.in config.h @ONLY)
 # 资源文件路径
 set(QRC_SOURCES "assets/sources.qrc")
 
-spark_add_library_realpaths(
+spark_aux_source_directories(sources
+    src/backend
     src/utils
-    src/global+utils
-    src/view+utils+global
-    src/backend+view
+    src/global
+    src/view
 )
 
 spark_add_executable_path(${PROJECT_NAME} src
-    ${QRC_SOURCES}
+    ${QRC_SOURCES} ${sources}
 )
-target_link_backend(${PROJECT_NAME})
+target_link_qt5(${PROJECT_NAME})
 
 include(cmake/SparkBuildGraphviz.cmake)
 

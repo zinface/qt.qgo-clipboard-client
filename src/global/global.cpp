@@ -1,7 +1,7 @@
 #include "global.h"
 #include "config.h"
-#include <configutil.h>
-#include <pathutil.h>
+#include <utils/configutil.h>
+#include <utils/pathutil.h>
 
 #define KEY_SERVER_ADDRESS "Server/Address"
 
