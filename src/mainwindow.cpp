@@ -144,13 +144,13 @@ void MainWindow::clipboardChanged()
                 clipboardApi->set(mime, Base64ByteArray::fromByteArray(byteArray));
                 updateShowText(QString("(%1)(%2)\n(%3)").arg(f.fileName()).arg(f.size()).arg(mime));
                 currentType = File;
-                checkData = mime;
+                checkData = Base64Text::fromText(mime);
                 return;
             }
         }
         qd << "Api: set text";
-        checkData = text;
-        clipboardApi->set("text", Base64Text::fromText(text.toUtf8()));
+        checkData = Base64Text::fromText(text);
+        clipboardApi->set("text", checkData);
         updateShowText(text);
 
         return;
@@ -267,7 +267,7 @@ void MainWindow::onClipboardUpdate()
         if (object.value("mime").toString().compare("text") == 0) {
             auto data = object.value("data").toString().replace(" ", "+");
             qd << "Update:" << data << " -> " << Base64Text::fromBase64(data);
-            if (checkData.compare(Base64Text::fromBase64(data)) != 0) {
+            if (checkData.compare(data) != 0) {
                 clipboard->setText(QString::fromUtf8(Base64Text::fromBase64(data).toUtf8()));
                 updateShowText(Base64Text::fromBase64(data));
             }
@@ -286,7 +286,7 @@ void MainWindow::onClipboardUpdate()
                 return;
             }
 
-            if (checkData.compare(Base64ByteArray::fromBase64(data)) != 0) {
+            if (checkData.compare(data) != 0) {
                 QString filePath = tempDir.filePath(fileName);
                 qd << "filePath:" << filePath;
 
