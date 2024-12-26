@@ -29,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 , image(new QLabel())
 {
     ui->setupUi(this);
-    setWindowTitle("云剪贴板(基于Qt) - v0.1");
+
     clipboard = qApp->clipboard();
     clipboardApi = new ClipboardApi;
     systray = new QSystemTrayIcon(this);

@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     a.setApplicationName("qgo-clipboard-client");
-    a.setApplicationDisplayName("云剪贴板 - v" PROJECT_VERSION);
+    a.setApplicationDisplayName("云剪贴板(基于Qt) - v" PROJECT_VERSION);
     a.setApplicationVersion(PROJECT_VERSION);
 
     MainWindow wm;
