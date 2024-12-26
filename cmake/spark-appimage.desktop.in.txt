@@ -6,4 +6,4 @@ Icon=default
 Comment=@APP_COMMENT@
 Terminal=true
 Type=Application
-Categories=@APP_CATEGORIES@
+Categories=@APP_CATEGORIES@;
