@@ -25,8 +25,11 @@
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
-,ui(new Ui::MainWindow)
-, image(new QLabel())
+    , ui(new Ui::MainWindow)
+    , image(new QLabel())
+    , a_copy(new QAction("复制"))
+    , a_copy_base64(new QAction("复制为Base64"))
+    , m_copyed(false)
 {
     ui->setupUi(this);
 
@@ -34,12 +37,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     clipboardApi = new ClipboardApi;
     systray = new QSystemTrayIcon(this);
 
-
     connect(clipboard, &QClipboard::dataChanged, this, &MainWindow::clipboardChanged);
-
-
-    QAction *a_copy = new QAction("复制");
-    QAction *a_copy_base64 = new QAction("复制为Base64");
     connect(a_copy, &QAction::triggered, this, &MainWindow::clipboardCopy);
     connect(a_copy_base64, &QAction::triggered, this, &MainWindow::clipboardCopyBase64);
 
@@ -47,13 +45,32 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     ui->label->addAction(a_copy_base64);
     ui->label->setContextMenuPolicy(Qt::ContextMenuPolicy::ActionsContextMenu);
 
+    // Check Server
+    initClipboardMonitor();
+
+    // Systray 
+    initSystemTrayIcon();
+
+    // resize
+    resize(400, 300);
+}
+
+MainWindow::~MainWindow()
+{
+
+}
+
+void MainWindow::initClipboardMonitor()
+{
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainWindow::onClipboardCheckLatest);
     // ms
     timer->setInterval(1000 * 3);
     timer->start();
+}
 
-    // Systray 
+void MainWindow::initSystemTrayIcon()
+{
     QAction *showWindow = new QAction("显示窗口");
     connect(showWindow, SIGNAL(triggered()), this, SLOT(show()));
     QAction *quitAction = new QAction("退出");
@@ -72,20 +89,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     menu->addAction(autoOpenTempDirAction);
     menu->addAction(showWindow);
     menu->addAction(quitAction);
-    
+
     systray->setIcon(QIcon(":/systray.png"));
     systray->setContextMenu(menu);
     systray->show();
-    
-    connect(systray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(onSysTrayActivated(QSystemTrayIcon::ActivationReason)));
-    
-    // resize
-    resize(400, 300);
-}
 
-MainWindow::~MainWindow()
-{
-    
+    connect(systray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(onSysTrayActivated(QSystemTrayIcon::ActivationReason)));
+
 }
 
 /**
@@ -95,12 +105,24 @@ MainWindow::~MainWindow()
  */
 void MainWindow::clipboardChanged()
 {
+    if (m_copyed)
+    {
+        m_copyed = false;
+        return;
+    }
+
     // 获取剪贴板文本数据
     QString text = clipboard->text();
-    if (!text.isEmpty()) {
+    const QMimeData *data = clipboard->mimeData();
+    auto atext = data->hasText();
+    auto aimage =  data->hasImage();
+
+    if (atext) {
+
         if (text.compare(checkData) == 0) {
             return;
         }
+
         {
             bool uri = false;
             QString filePath = text;
@@ -156,6 +178,9 @@ void MainWindow::clipboardChanged()
     checkData = Base64Pixmap::fromImage(QPixmap::fromImage(img));
 }
 
+/**
+ * @brief 菜单：复制
+ */
 void MainWindow::clipboardCopy()
 {
 #if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
@@ -163,9 +188,13 @@ void MainWindow::clipboardCopy()
 #else
     QPixmap pixmap = image->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
 #endif
+    m_copyed = true;
     clipboard->setPixmap(pixmap);
 }
 
+/**
+ * @brief 菜单：复制 base64
+ */
 void MainWindow::clipboardCopyBase64()
 {
 #if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
@@ -173,6 +202,7 @@ void MainWindow::clipboardCopyBase64()
 #else
     QPixmap pixmap = image->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
 #endif
+    m_copyed = true;
     clipboard->setText(Base64Pixmap::fromImage(pixmap));
 }
 

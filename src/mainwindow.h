@@ -25,6 +25,9 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void initClipboardMonitor();
+    void initSystemTrayIcon();
+
     enum ClipboardType {
         Image,
         Text,
@@ -37,6 +40,11 @@ private:
     QTemporaryFile tempFile;
     QTemporaryDir tempDir;
     bool openTempDir = true;
+
+    QAction *a_copy;
+    QAction *a_copy_base64;
+
+    bool m_copyed;
 
 public slots:
     void clipboardChanged();
@@ -59,6 +67,7 @@ private:
 
     void updateShowText(QString text);
     void updatePreviewImage(int w, int h);
+    
 
 protected:
     void closeEvent(QCloseEvent *event);
