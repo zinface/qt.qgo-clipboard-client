@@ -6,7 +6,7 @@
 #include <QDesktopWidget>
 #include <QMainWindow>
 
-#include "global/config.h"
+#include "config.h"
 
 void moveCenter(MainWindow &wm) {
     QDesktopWidget *desktop = QApplication::desktop();
