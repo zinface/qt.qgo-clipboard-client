@@ -35,6 +35,10 @@ spark_framework_include_with_git(${PROJECT_NAME}
     https://gitee.com/spark-framework-libs/network-access-libs
     FEATURES httpmanager)
 
+spark_framework_include_with_git(${PROJECT_NAME}
+    https://gitee.com/zinface/qt.clipboard-history-analyzer
+    FEATURES historyitem)
+
 spark_include(cmake/SparkBuildGraphviz.cmake)
 
 
