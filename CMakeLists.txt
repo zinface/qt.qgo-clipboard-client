@@ -39,6 +39,8 @@ spark_framework_include_with_git(${PROJECT_NAME}
     https://gitee.com/zinface/qt.clipboard-history-analyzer
     FEATURES historyitem)
 
+add_subdirectory(tests)
+
 spark_include(cmake/SparkBuildGraphviz.cmake)
 
 
