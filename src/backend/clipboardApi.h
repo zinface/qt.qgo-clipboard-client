@@ -10,13 +10,15 @@
 
 #include "config.h"
 
+#include <httpclient.h>
+
 class ClipboardApi : public QObject {
     Q_OBJECT
 
 public:
     void set(QString mime, QString baseData);
-    QJsonObject get();
-    QJsonObject info();
+    Response get();
+    Response info();
 
 private:
     HttpRequest *httpUtil = new HttpRequest;

@@ -2,44 +2,59 @@
 
 void ClipboardApi::set(QString mime, QString baseData)
 {
-    QNetworkRequest request;
-    request.setUrl(QUrl(REMOTE_HOST "/clipboard"));
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+//    QNetworkRequest request;
+//    request.setUrl(QUrl(REMOTE_HOST "/clipboard"));
+//    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QJsonObject object;
+//    QJsonObject object;
+//    object["mime"] = mime;
+//    object["data"] = baseData;
+
+//    QJsonDocument document(object);
+//    QByteArray jsonData = document.toJson(QJsonDocument::JsonFormat::Compact);
+
+//    // QTextStream(stdout) << "Set: " << QString(document.toJson(QJsonDocument::Compact)) << "\n";
+    
+//    httpUtil->postRequest(request, jsonData);
+
+    Request request(REMOTE_HOST "/clipboard");
+
+    QVariantMap object;
     object["mime"] = mime;
     object["data"] = baseData;
+    request.setData(object);
 
-    QJsonDocument document(object);
-    QByteArray jsonData = document.toJson(QJsonDocument::JsonFormat::Compact);
-
-    // QTextStream(stdout) << "Set: " << QString(document.toJson(QJsonDocument::Compact)) << "\n";
-    
-    httpUtil->postRequest(request, jsonData);
+    HttpClient::instance().post(request);
 }
 
-QJsonObject ClipboardApi::get()
+Response ClipboardApi::get()
 {
-    QNetworkRequest request;
-    request.setUrl(QUrl(REMOTE_HOST "/clipboard"));
+//    QNetworkRequest request;
+//    request.setUrl(QUrl(REMOTE_HOST "/clipboard"));
 
-    QByteArray data = httpUtil->getRequestSync(request);
+//    QByteArray data = httpUtil->getRequestSync(request);
 
-    QJsonDocument document = QJsonDocument::fromJson(data);
+//    QJsonDocument document = QJsonDocument::fromJson(data);
     
-    // QTextStream(stdout) << "Get: " << QString(document.toJson(QJsonDocument::Compact)) << "\n";
+//    // QTextStream(stdout) << "Get: " << QString(document.toJson(QJsonDocument::Compact)) << "\n";
 
-    return document.object();
+//    return document.object();
+
+    Request request(REMOTE_HOST "/clipboard");
+    return HttpClient::instance().get(request);
 }
 
-QJsonObject ClipboardApi::info()
+Response ClipboardApi::info()
 {
-    QNetworkRequest request;
-    request.setUrl(QUrl(REMOTE_HOST "/clipboard/info"));
+//    QNetworkRequest request;
+//    request.setUrl(QUrl(REMOTE_HOST "/clipboard/info"));
 
-    QJsonDocument document = QJsonDocument::fromJson(httpUtil->getRequestSync(request));
+//    QJsonDocument document = QJsonDocument::fromJson(httpUtil->getRequestSync(request));
 
-    // QTextStream(stdout) << "Info: " << QString(document.toJson(QJsonDocument::Compact)) << "\n";
+//    // QTextStream(stdout) << "Info: " << QString(document.toJson(QJsonDocument::Compact)) << "\n";
 
-    return document.object();
+//    return document.object();
+
+    Request request(REMOTE_HOST "/clipboard/info");
+    return HttpClient::instance().get(request);
 }

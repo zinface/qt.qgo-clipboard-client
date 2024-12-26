@@ -29,8 +29,11 @@ target_link_qt5(${PROJECT_NAME})
 
 spark_framework_include_with_git(${PROJECT_NAME}
     https://gitee.com/spark-framework-libs/spark-framework-features
-    FEATURES version screenutil
-)
+    FEATURES version screenutil qd)
+
+spark_framework_include_with_git(${PROJECT_NAME}
+    https://gitee.com/spark-framework-libs/network-access-libs
+    FEATURES httpmanager)
 
 spark_include(cmake/SparkBuildGraphviz.cmake)
 

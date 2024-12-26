@@ -185,7 +185,9 @@ void MainWindow::clipboardCopyBase64()
  */
 void MainWindow::onClipboardCheckLatest()
 {
-    auto object = clipboardApi->info();
+    auto resp = clipboardApi->info();
+    auto object = resp.toMap();
+
     if (object.contains("create_at")) {
         if (object.value("create_at").toString().compare(checkTime) != 0) {
             onClipboardUpdate();
@@ -200,7 +202,8 @@ void MainWindow::onClipboardCheckLatest()
  */
 void MainWindow::onClipboardUpdate()
 {
-    auto object = clipboardApi->get();
+    auto resp = clipboardApi->get();
+    auto object = resp.toMap();
 
     // 存储云端时间状态
     if (object.contains("create_at")) {
