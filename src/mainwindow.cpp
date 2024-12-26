@@ -112,13 +112,12 @@ void MainWindow::clipboardChanged()
     }
 
     // 获取剪贴板文本数据
-    QString text = clipboard->text();
     const QMimeData *data = clipboard->mimeData();
     auto atext = data->hasText();
     auto aimage =  data->hasImage();
 
+    QString text = data->text();
     if (atext) {
-
         if (text.compare(checkData) == 0) {
             return;
         }
@@ -142,7 +141,6 @@ void MainWindow::clipboardChanged()
                 auto byteArray = file.readAll();
                 file.close();
 
-
                 clipboardApi->set(mime, Base64ByteArray::fromByteArray(byteArray));
                 updateShowText(QString("(%1)(%2)\n(%3)").arg(f.fileName()).arg(f.size()).arg(mime));
                 currentType = File;
@@ -150,8 +148,9 @@ void MainWindow::clipboardChanged()
                 return;
             }
         }
+        qd << "Api: set text";
         checkData = text;
-        clipboardApi->set("text", Base64Text::fromText(text));
+        clipboardApi->set("text", Base64Text::fromText(text.toUtf8()));
         updateShowText(text);
 
         return;
@@ -159,23 +158,21 @@ void MainWindow::clipboardChanged()
 
     // 获取剪贴板图片数据
     QImage img = clipboard->image();
-    if (img.isNull()) {
-            qd << QString("");
-        return;
+    if (aimage && img.isNull() == false) {
+        int imgW = img.width();
+        int imgH = img.height();
+
+        qd << QString("Image: %1x%2").arg(imgW).arg(imgH);
+        image->setFixedWidth(imgW);
+        image->setFixedHeight(imgH);
+        image->setPixmap(QPixmap::fromImage(img));
+
+        updatePreviewImage(width(), height());
+
+        qd << "Api: set image";
+        clipboardApi->set("image", Base64Pixmap::fromImage(QPixmap::fromImage(img)));
+        checkData = Base64Pixmap::fromImage(QPixmap::fromImage(img));
     }
-
-    int imgW = img.width();
-    int imgH = img.height();
-
-    qd << QString("Image: %1x%2\n").arg(imgW).arg(imgH);
-    image->setFixedWidth(imgW);
-    image->setFixedHeight(imgH);
-    image->setPixmap(QPixmap::fromImage(img));
-
-    updatePreviewImage(width(), height());
-
-    clipboardApi->set("image", Base64Pixmap::fromImage(QPixmap::fromImage(img)));
-    checkData = Base64Pixmap::fromImage(QPixmap::fromImage(img));
 }
 
 /**
@@ -216,6 +213,7 @@ void MainWindow::onClipboardCheckLatest()
     auto resp = clipboardApi->info();
     auto object = resp.toMap();
 
+    qd << resp.toJson();
     if (object.contains("create_at")) {
         if (object.value("create_at").toString().compare(checkTime) != 0) {
             onClipboardUpdate();
@@ -245,13 +243,16 @@ void MainWindow::onClipboardUpdate()
         checkTime = latestTime;
     }
 
+    m_copyed = true;
+
     // 存储云端最新数据
     if (object.contains("mime")) {
         // 获取数据类型
         QString mime = object.value("mime").toString();
         
-        qd << QString(": MineType = %1\n").arg(mime);
+        qd << QString("MineType = %1").arg(mime);
 
+        // is image
         if (object.value("mime").toString().compare("image") == 0) {
             auto data = object.value("data").toString().replace(" ", "+");
             
@@ -262,16 +263,18 @@ void MainWindow::onClipboardUpdate()
             return;
         }
 
+        // is text
         if (object.value("mime").toString().compare("text") == 0) {
             auto data = object.value("data").toString().replace(" ", "+");
             qd << "Update:" << data << " -> " << Base64Text::fromBase64(data);
             if (checkData.compare(Base64Text::fromBase64(data)) != 0) {
-                clipboard->setText(Base64Text::fromBase64(data));
+                clipboard->setText(QString::fromUtf8(Base64Text::fromBase64(data).toUtf8()));
                 updateShowText(Base64Text::fromBase64(data));
             }
             return;
         }
 
+        // is mine
         if (object.value("mime").toString().startsWith("file/")) {
             auto data = object.value("data").toString().replace(" ", "+");
             qd << "Update:" << mime;
