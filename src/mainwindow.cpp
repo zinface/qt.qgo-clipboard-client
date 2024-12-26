@@ -138,7 +138,7 @@ void MainWindow::clipboardChanged()
     // 获取剪贴板图片数据
     QImage img = clipboard->image();
     if (img.isNull()) {
-            qd << QString("") << "\n";
+            qd << QString("");
         return;
     }
 
@@ -234,7 +234,7 @@ void MainWindow::onClipboardUpdate()
 
         if (object.value("mime").toString().compare("text") == 0) {
             auto data = object.value("data").toString().replace(" ", "+");
-            qd << "Update:" << data << " -> " << Base64Text::fromBase64(data) << "\n";
+            qd << "Update:" << data << " -> " << Base64Text::fromBase64(data);
             if (checkData.compare(Base64Text::fromBase64(data)) != 0) {
                 clipboard->setText(Base64Text::fromBase64(data));
                 updateShowText(Base64Text::fromBase64(data));
@@ -244,7 +244,7 @@ void MainWindow::onClipboardUpdate()
 
         if (object.value("mime").toString().startsWith("file/")) {
             auto data = object.value("data").toString().replace(" ", "+");
-            qd << "Update:" << mime << "\n";
+            qd << "Update:" << mime;
 
             QString fileName = mime.split("/").at(1);
 
