@@ -6,7 +6,6 @@
 #include <QApplication>
 #include <QImage>
 #include <QPainter>
-#include <QTextStream>
 #include <QLabel>
 #include <QPicture>
 #include <QHBoxLayout>
@@ -20,6 +19,7 @@
 #include <QFileInfo>
 #include <QMimeData>
 #include <QDesktopServices>
+#include <qd.h>
 
 #include "view/configdialog.h"
 
@@ -138,16 +138,14 @@ void MainWindow::clipboardChanged()
     // 获取剪贴板图片数据
     QImage img = clipboard->image();
     if (img.isNull()) {
-            QTextStream(stdout) << __FUNCTION__ << 
-                QString("") << "\n";
+            qd << QString("") << "\n";
         return;
     }
 
     int imgW = img.width();
     int imgH = img.height();
 
-    QTextStream(stdout) << __FUNCTION__ << 
-        QString("Image: %1x%2\n").arg(imgW).arg(imgH);
+    qd << QString("Image: %1x%2\n").arg(imgW).arg(imgH);
     image->setFixedWidth(imgW);
     image->setFixedHeight(imgH);
     image->setPixmap(QPixmap::fromImage(img));
@@ -222,8 +220,7 @@ void MainWindow::onClipboardUpdate()
         // 获取数据类型
         QString mime = object.value("mime").toString();
         
-        QTextStream(stdout) << __FUNCTION__ << 
-            QString(": MineType = %1\n").arg(mime);
+        qd << QString(": MineType = %1\n").arg(mime);
 
         if (object.value("mime").toString().compare("image") == 0) {
             auto data = object.value("data").toString().replace(" ", "+");
@@ -237,7 +234,7 @@ void MainWindow::onClipboardUpdate()
 
         if (object.value("mime").toString().compare("text") == 0) {
             auto data = object.value("data").toString().replace(" ", "+");
-            QTextStream(stdout) << "Update:" << data << " -> " << Base64Text::fromBase64(data) << "\n";
+            qd << "Update:" << data << " -> " << Base64Text::fromBase64(data) << "\n";
             if (checkData.compare(Base64Text::fromBase64(data)) != 0) {
                 clipboard->setText(Base64Text::fromBase64(data));
                 updateShowText(Base64Text::fromBase64(data));
@@ -247,7 +244,7 @@ void MainWindow::onClipboardUpdate()
 
         if (object.value("mime").toString().startsWith("file/")) {
             auto data = object.value("data").toString().replace(" ", "+");
-            QTextStream(stdout) << "Update:" << mime << "\n";
+            qd << "Update:" << mime << "\n";
 
             QString fileName = mime.split("/").at(1);
 
@@ -258,7 +255,7 @@ void MainWindow::onClipboardUpdate()
 
             if (checkData.compare(Base64ByteArray::fromBase64(data)) != 0) {
                 QString filePath = tempDir.filePath(fileName);
-                qDebug() << "filePath:" << filePath;
+                qd << "filePath:" << filePath;
 
                 if (openTempDir) {
                     QDesktopServices::openUrl(QUrl(tempDir.path()));
