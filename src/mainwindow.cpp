@@ -118,7 +118,7 @@ void MainWindow::clipboardChanged()
 
     QString text = data->text();
     if (atext) {
-        if (text.compare(checkData) == 0) {
+        if (Base64Text::fromText(text).compare(checkData) == 0) {
             return;
         }
 
@@ -149,6 +149,7 @@ void MainWindow::clipboardChanged()
             }
         }
         qd << "Api: set text";
+
         checkData = Base64Text::fromText(text);
         clipboardApi->set("text", checkData);
         updateShowText(text);
