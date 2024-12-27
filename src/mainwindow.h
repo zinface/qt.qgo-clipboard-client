@@ -57,7 +57,7 @@ public slots:
 private:
     QClipboard *clipboard;
     ClipboardApi *clipboardApi;
-    QLabel *image;
+    QLabel *preview_image;
     QString checkTime;
     QString checkData;
     QString checkMime;

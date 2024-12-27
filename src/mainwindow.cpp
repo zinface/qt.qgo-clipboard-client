@@ -26,7 +26,7 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , image(new QLabel())
+    , preview_image(new QLabel())
     , a_copy(new QAction("复制"))
     , a_copy_base64(new QAction("复制为Base64"))
     , m_copyed(false)
@@ -118,21 +118,24 @@ void MainWindow::clipboardChanged()
 
     QString text = data->text();
     if (atext) {
-        if (Base64Text::fromText(text).compare(checkData) == 0) {
+        if (text.toUtf8().toBase64().compare(checkData.toUtf8()) == 0) {
             return;
         }
 
         {
-            bool uri = false;
+            // 检查文件是否存在
+            // file:// 开头的使用 QUrl 转本地文件路径
+            // 本地文件路径是文件并且文件大小小于 5mb 将进入检查阶段
             QString filePath = text;
-            if (text.startsWith("file://")) {
+            if (filePath.startsWith("file://")) {
                 filePath = QUrl(text).toLocalFile();
             }
-            QFileInfo f(filePath);
-            int max = 1     * 1024 * 1024 * 5;
-            //        ^byte   ^k     ^m
-            if (f.exists(filePath) && f.isFile() && f.size() < max) {
 
+            QFileInfo f(filePath);
+            int max = 1     * 1024 * 1024 * 5;  // 5mb 大小
+            //        ^byte   ^k     ^m
+
+            if (f.exists(filePath) && f.isFile() && f.size() < max) {
                 QString mime = QString("file/%1").arg(f.fileName());
                 if (mime.compare(checkData) == 0) return;
 
@@ -141,15 +144,16 @@ void MainWindow::clipboardChanged()
                 auto byteArray = file.readAll();
                 file.close();
 
-                clipboardApi->set(mime, Base64ByteArray::fromByteArray(byteArray));
+                clipboardApi->set(mime, byteArray.toBase64());
                 updateShowText(QString("(%1)(%2)\n(%3)").arg(f.fileName()).arg(f.size()).arg(mime));
+
                 currentType = File;
                 checkData = Base64Text::fromText(mime);
                 return;
             }
         }
-        qd << "Api: set text";
 
+        qd << "Api: set text";
         checkData = text.toUtf8().toBase64();
         clipboardApi->set("text", checkData);
         updateShowText(text);
@@ -164,9 +168,9 @@ void MainWindow::clipboardChanged()
         int imgH = img.height();
 
         qd << QString("Image: %1x%2").arg(imgW).arg(imgH);
-        image->setFixedWidth(imgW);
-        image->setFixedHeight(imgH);
-        image->setPixmap(QPixmap::fromImage(img));
+        preview_image->setFixedWidth(imgW);
+        preview_image->setFixedHeight(imgH);
+        preview_image->setPixmap(QPixmap::fromImage(img));
 
         updatePreviewImage(width(), height());
 
@@ -184,7 +188,7 @@ void MainWindow::clipboardCopy()
 #if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
     QPixmap pixmap = *image->pixmap();
 #else
-    QPixmap pixmap = image->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
+    QPixmap pixmap = preview_image->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
 #endif
     m_copyed = true;
     clipboard->setPixmap(pixmap);
@@ -198,7 +202,7 @@ void MainWindow::clipboardCopyBase64()
 #if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
     QPixmap pixmap = *image->pixmap();
 #else
-    QPixmap pixmap = image->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
+    QPixmap pixmap = preview_image->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
 #endif
     m_copyed = true;
     clipboard->setText(Base64Pixmap::fromImage(pixmap));
@@ -258,7 +262,11 @@ void MainWindow::onClipboardUpdate()
             auto data = object.value("data").toString().replace(" ", "+");
             
             if (checkData.compare(data) != 0) {
-                clipboard->setImage(Base64Image::formBase64(data));
+                QImage img = Base64Image::formBase64(data);
+                preview_image->setPixmap(QPixmap::fromImage(img));
+                checkData = Base64Pixmap::fromImage(QPixmap::fromImage(img));
+                updatePreviewImage(img.width(),img.height());
+                clipboard->setImage(img);
             }
 
             return;
@@ -346,7 +354,7 @@ void MainWindow::updatePreviewImage(int w, int h)
 #if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
     QPixmap imagePixmap = *image->pixmap();
 #else
-    QPixmap imagePixmap = image->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
+    QPixmap imagePixmap = preview_image->pixmap(Qt::ReturnByValueConstant::ReturnByValue);
 #endif
     if (imagePixmap.isNull()) {
         return;
