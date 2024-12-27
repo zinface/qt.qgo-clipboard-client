@@ -144,7 +144,7 @@ void MainWindow::clipboardChanged()
                 auto byteArray = file.readAll();
                 file.close();
 
-                clipboardApi->set(mime, byteArray.toBase64());
+                clipboardApi->set(mime.toUtf8(), byteArray.toBase64());
                 updateShowText(QString("(%1)(%2)\n(%3)").arg(f.fileName()).arg(f.size()).arg(mime));
 
                 currentType = File;
