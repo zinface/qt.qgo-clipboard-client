@@ -83,6 +83,12 @@ add_appimage_target(${PROJECT_NAME})      # 添加到 Appimage 中的默认目�
 
 # 在 Windows 中开启 UNICODE 以支持 TCHAR 功能
 if(WIN32)
+    # Windows 下为目标追加图标资源与目标属性
     add_compile_definitions(_UNICODE= UNICODE=)
-endif()
-include(cmake/windows-deployqt.cmake)
+    target_sources(${PROJECT_NAME} PRIVATE icon.rc)
+    set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+    return()
+    
+    include(cmake/windows-deployqt.cmake)
+endif(WIN32)
+
