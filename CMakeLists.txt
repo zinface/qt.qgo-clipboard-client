@@ -41,8 +41,19 @@ spark_framework_include_with_git(${PROJECT_NAME}
 
 add_subdirectory(tests)
 
-spark_include(cmake/SparkBuildGraphviz.cmake)
 
+# 在 Windows 中开启 UNICODE 以支持 TCHAR 功能
+if(WIN32)
+    # Windows 下为目标追加图标资源与目标属性
+    add_compile_definitions(_UNICODE= UNICODE=)
+    target_sources(${PROJECT_NAME} PRIVATE icon.rc)
+    set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+    include(cmake/windows-deployqt.cmake)
+    message("Windows Done.")
+    return()
+endif(WIN32)
+
+spark_include(cmake/SparkBuildGraphviz.cmake)
 
 spark_include(cmake/SparkDesktopMacros.cmake)
 # 内容默认应用名称: Name= 应与项目名称相同
@@ -80,15 +91,4 @@ spark_include(cmake/SparkAppimageConfig.cmake)  # 导入来自 Spark 构建的 A
 add_appimage_icon(assets/icon.png)       # 添加到 Appimage 中的默认的图标
 add_appimage_desktop()                    # 添加到 Appimage 中的默认desktop(使用来自 Spark 构建的 Desktop 构建中配置的信息(必须要求 spark-desktop))
 add_appimage_target(${PROJECT_NAME})      # 添加到 Appimage 中的默认目标，应用对 Appimage 的构建
-
-# 在 Windows 中开启 UNICODE 以支持 TCHAR 功能
-if(WIN32)
-    # Windows 下为目标追加图标资源与目标属性
-    add_compile_definitions(_UNICODE= UNICODE=)
-    target_sources(${PROJECT_NAME} PRIVATE icon.rc)
-    set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
-    return()
-    
-    include(cmake/windows-deployqt.cmake)
-endif(WIN32)
 
