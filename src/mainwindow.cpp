@@ -150,7 +150,7 @@ void MainWindow::clipboardChanged()
         }
         qd << "Api: set text";
 
-        checkData = Base64Text::fromText(text);
+        checkData = text.toUtf8().toBase64();
         clipboardApi->set("text", checkData);
         updateShowText(text);
 
