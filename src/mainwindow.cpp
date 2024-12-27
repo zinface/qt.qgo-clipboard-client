@@ -156,7 +156,7 @@ void MainWindow::clipboardChanged()
         qd << "Api: set text";
         checkData = text.toUtf8().toBase64();
         clipboardApi->set("text", checkData);
-        updateShowText(text);
+        updateShowText(text, false);
 
         return;
     }
@@ -278,7 +278,7 @@ void MainWindow::onClipboardUpdate()
             qd << "Update:" << data << " -> " << Base64Text::fromBase64(data);
             if (checkData.compare(data) != 0) {
                 clipboard->setText(QString::fromUtf8(Base64Text::fromBase64(data).toUtf8()));
-                updateShowText(Base64Text::fromBase64(data));
+                updateShowText(Base64Text::fromBase64(data), false);
             }
             goto done;
         }
@@ -345,9 +345,13 @@ void MainWindow::onSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
     }
 }
 
-void MainWindow::updateShowText(QString text)
+void MainWindow::updateShowText(QString text, bool center)
 {
     ui->label->setText(text);
+    if (center)
+        ui->label->setAlignment(Qt::AlignmentFlag::AlignCenter);
+    else
+        ui->label->setAlignment(Qt::AlignmentFlag::AlignLeft);
     currentType = Text;
 }
 
@@ -371,7 +375,6 @@ void MainWindow::updatePreviewImage(int w, int h)
         temp = imagePixmap;
     }
     ui->label->setPixmap(temp);
-    ui->label->setAlignment(Qt::AlignmentFlag::AlignCenter);
     currentType = Image;
 }
 

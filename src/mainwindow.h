@@ -65,7 +65,7 @@ private:
     QSystemTrayIcon *systray;
 
 
-    void updateShowText(QString text);
+    void updateShowText(QString text, bool center = true);
     void updatePreviewImage(int w, int h);
     
 
