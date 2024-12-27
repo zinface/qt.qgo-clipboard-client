@@ -265,7 +265,7 @@ void MainWindow::onClipboardUpdate()
                 QImage img = Base64Image::formBase64(data);
                 preview_image->setPixmap(QPixmap::fromImage(img));
                 checkData = Base64Pixmap::fromImage(QPixmap::fromImage(img));
-                updatePreviewImage(img.width(),img.height());
+                updatePreviewImage(width(), height());
                 clipboard->setImage(img);
             }
 
