@@ -269,7 +269,7 @@ void MainWindow::onClipboardUpdate()
                 clipboard->setImage(img);
             }
 
-            return;
+            goto done;
         }
 
         // is text
@@ -280,7 +280,7 @@ void MainWindow::onClipboardUpdate()
                 clipboard->setText(QString::fromUtf8(Base64Text::fromBase64(data).toUtf8()));
                 updateShowText(Base64Text::fromBase64(data));
             }
-            return;
+            goto done;
         }
 
         // is mine
@@ -292,7 +292,7 @@ void MainWindow::onClipboardUpdate()
 
             QString clipText = clipboard->text();
             if (clipText.contains(fileName)) {
-                return;
+                goto done;
             }
 
             if (checkData.compare(data) != 0) {
@@ -316,9 +316,12 @@ void MainWindow::onClipboardUpdate()
 
                 updateShowText(QString("(%1)(%2)\n(%3)").arg(fileName).arg(f.size()).arg(filePath));
             }
-            return;
+            goto done;
         }
     }
+
+done:
+    m_copyed = false;
 }
 
 void MainWindow::onSysTrayActivated(QSystemTrayIcon::ActivationReason reason)
