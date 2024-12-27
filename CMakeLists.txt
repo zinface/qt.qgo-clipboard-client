@@ -10,6 +10,11 @@ if(NOT DEFINED REMOTE_HOST)
     set(REMOTE_HOST "http://127.0.0.1:9090")
 endif(NOT DEFINED REMOTE_HOST)
 
+# 控制 qDebug 行为
+if(CMAKE_BUILD_TYPE MATCHES "Release")
+    add_compile_definitions(QT_NO_WARNING_OUTPUT=1 QT_NO_DEBUG_OUTPUT=1)
+endif(CMAKE_BUILD_TYPE MATCHES "Release")
+
 configure_file(src/global/config.h.in config.h @ONLY)
 
 # 资源文件路径
