@@ -351,7 +351,7 @@ void MainWindow::updateShowText(QString text, bool center)
     if (center)
         ui->label->setAlignment(Qt::AlignmentFlag::AlignCenter);
     else
-        ui->label->setAlignment(Qt::AlignmentFlag::AlignLeft);
+        ui->label->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
     currentType = Text;
 }
 
