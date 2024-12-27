@@ -1,9 +1,10 @@
 #include "clipboardApi.h"
+#include "global/global.h"
 
 void ClipboardApi::set(QString mime, QString baseData)
 {
 //    QNetworkRequest request;
-//    request.setUrl(QUrl(REMOTE_HOST "/clipboard"));
+//    request.setUrl(QUrl(GL.getAddress() + "/clipboard"));
 //    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
 //    QJsonObject object;
@@ -17,7 +18,7 @@ void ClipboardApi::set(QString mime, QString baseData)
     
 //    httpUtil->postRequest(request, jsonData);
 
-    Request request(REMOTE_HOST "/clipboard");
+    Request request(GL.getAddress() +  "/clipboard");
 
     QVariantMap object;
     object["mime"] = mime;
@@ -30,7 +31,7 @@ void ClipboardApi::set(QString mime, QString baseData)
 Response ClipboardApi::get()
 {
 //    QNetworkRequest request;
-//    request.setUrl(QUrl(REMOTE_HOST "/clipboard"));
+//    request.setUrl(QUrl(GL.getAddress() + "/clipboard"));
 
 //    QByteArray data = httpUtil->getRequestSync(request);
 
@@ -40,14 +41,14 @@ Response ClipboardApi::get()
 
 //    return document.object();
 
-    Request request(REMOTE_HOST "/clipboard");
+    Request request(GL.getAddress() + "/clipboard");
     return HttpClient::instance().get(request);
 }
 
 Response ClipboardApi::info()
 {
 //    QNetworkRequest request;
-//    request.setUrl(QUrl(REMOTE_HOST "/clipboard/info"));
+//    request.setUrl(QUrl(GL.getAddress() + "/clipboard/info"));
 
 //    QJsonDocument document = QJsonDocument::fromJson(httpUtil->getRequestSync(request));
 
@@ -55,6 +56,6 @@ Response ClipboardApi::info()
 
 //    return document.object();
 
-    Request request(REMOTE_HOST "/clipboard/info");
+    Request request(GL.getAddress() + "/clipboard/info");
     return HttpClient::instance().get(request);
 }

@@ -30,4 +30,7 @@ QString Global::getAddress() const
 void Global::setAddress(const QString &newAddress)
 {
     address = newAddress;
+
+    QString clipConfig = PathUtil::clipboardServerConfig();
+    ConfigUtil::instance().writeConfigValue(clipConfig, KEY_SERVER_ADDRESS, address);
 }

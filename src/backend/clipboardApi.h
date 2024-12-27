@@ -8,8 +8,6 @@
 #include <QJsonValue>
 #include "utils/httprequest.h"
 
-#include "config.h"
-
 #include <httpclient.h>
 
 class ClipboardApi : public QObject {

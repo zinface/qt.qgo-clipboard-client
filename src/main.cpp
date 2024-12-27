@@ -1,4 +1,5 @@
 
+#include "global/global.h"
 #include "mainwindow.h"
 
 #include <QApplication>
@@ -22,6 +23,6 @@ int main(int argc, char *argv[])
 
     ScreenUtil::moveCenterForCursor(wm);
 
-    qDebug() << "[ClipBoard Server]: " << REMOTE_HOST;
+    qDebug() << "[ClipBoard Server]: " << REMOTE_HOST << ", But Config:" << GL.getAddress();
     return a.exec();
 }

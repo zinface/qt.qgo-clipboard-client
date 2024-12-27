@@ -13,7 +13,9 @@ ConfigDialog::ConfigDialog(QWidget *parent) :
 
 ConfigDialog::~ConfigDialog()
 {
-    GL.setAddress(ui->lineEdit_server_address->text());
+    if (result() == Accepted) {
+        GL.setAddress(ui->lineEdit_server_address->text());
+    }
 
     delete ui;
 }
