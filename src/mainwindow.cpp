@@ -137,7 +137,7 @@ void MainWindow::clipboardChanged()
 
             if (f.exists(filePath) && f.isFile() && f.size() < max) {
                 QString mime = QString("file/%1").arg(f.fileName());
-                if (mime.compare(checkData) == 0) return;
+                if (mime.toUtf8().toBase64().compare(checkData.toUtf8()) == 0) return;
 
                 QFile file(f.absoluteFilePath());
                 file.open(QIODevice::ReadOnly);
@@ -148,7 +148,7 @@ void MainWindow::clipboardChanged()
                 updateShowText(QString("(%1)(%2)\n(%3)").arg(f.fileName()).arg(f.size()).arg(mime));
 
                 currentType = File;
-                checkData = Base64Text::fromText(mime);
+                checkData = mime.toUtf8().toBase64();
                 return;
             }
         }
