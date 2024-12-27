@@ -1,7 +1,7 @@
 
 cmake_minimum_required(VERSION 3.5.1)
 
-project(qgo-clipboard-client LANGUAGES CXX VERSION 0.0.1)
+project(qgo-clipboard-client LANGUAGES CXX VERSION 1.0.0)
 
 include(cmake/SparkWithGit.cmake)
 spark_initialize_modules()
