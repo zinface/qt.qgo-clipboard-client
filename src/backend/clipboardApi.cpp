@@ -1,7 +1,16 @@
 #include "clipboardApi.h"
 #include "global/global.h"
 
-void ClipboardApi::set(QString mime, QString baseData)
+ClipApiResponse::ClipApiResponse(Response resp) : Response(resp) {
+
+}
+
+QString ClipApiResponse::create_at()
+{
+    return toMap().value("create_at").toString();
+}
+
+ClipApiResponse ClipboardApi::set(QString mime, QString baseData)
 {
 //    QNetworkRequest request;
 //    request.setUrl(QUrl(GL.getAddress() + "/clipboard"));
@@ -25,10 +34,10 @@ void ClipboardApi::set(QString mime, QString baseData)
     object["data"] = baseData;
     request.setData(object);
 
-    HttpClient::instance().post(request);
+    return HttpClient::instance().post(request);
 }
 
-Response ClipboardApi::get()
+ClipApiResponse ClipboardApi::get()
 {
 //    QNetworkRequest request;
 //    request.setUrl(QUrl(GL.getAddress() + "/clipboard"));
@@ -45,7 +54,7 @@ Response ClipboardApi::get()
     return HttpClient::instance().get(request);
 }
 
-Response ClipboardApi::info()
+ClipApiResponse ClipboardApi::info()
 {
 //    QNetworkRequest request;
 //    request.setUrl(QUrl(GL.getAddress() + "/clipboard/info"));

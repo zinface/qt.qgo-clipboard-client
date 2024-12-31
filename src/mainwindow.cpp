@@ -155,7 +155,7 @@ void MainWindow::clipboardChanged()
 
         qd << "Api: set text";
         checkData = text.toUtf8().toBase64();
-        clipboardApi->set("text", checkData);
+        checkTime = clipboardApi->set("text", checkData).create_at();
         updateShowText(text, false);
 
         return;
@@ -175,7 +175,7 @@ void MainWindow::clipboardChanged()
         updatePreviewImage(width(), height());
 
         qd << "Api: set image";
-        clipboardApi->set("image", Base64Pixmap::fromImage(QPixmap::fromImage(img)));
+        checkTime = clipboardApi->set("image", Base64Pixmap::fromImage(QPixmap::fromImage(img))).create_at();
         checkData = Base64Pixmap::fromImage(QPixmap::fromImage(img));
     }
 }
@@ -221,6 +221,7 @@ void MainWindow::onClipboardCheckLatest()
     qd << resp.toJson();
     if (object.contains("create_at")) {
         if (object.value("create_at").toString().compare(checkTime) != 0) {
+            qd << object.value("create_at").toString() << checkTime;
             onClipboardUpdate();
         }
     }

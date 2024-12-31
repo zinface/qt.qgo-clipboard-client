@@ -10,13 +10,19 @@
 
 #include <httpclient.h>
 
+class ClipApiResponse : public Response {
+public:
+    ClipApiResponse(Response resp);
+    QString create_at();
+};
+
 class ClipboardApi : public QObject {
     Q_OBJECT
 
 public:
-    void set(QString mime, QString baseData);
-    Response get();
-    Response info();
+    ClipApiResponse set(QString mime, QString baseData);
+    ClipApiResponse get();
+    ClipApiResponse info();
 
 private:
     HttpRequest *httpUtil = new HttpRequest;
