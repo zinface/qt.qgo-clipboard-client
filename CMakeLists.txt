@@ -47,6 +47,9 @@ spark_framework_include_with_git(${PROJECT_NAME}
 spark_framework_include_with_git(${PROJECT_NAME}
     https://gitee.com/spark-framework-libs/qutils)
 
+spark_framework_include_with_git(${PROJECT_NAME}
+    https://gitee.com/zinface/qt-notify)
+
 add_subdirectory(tests)
 
 
