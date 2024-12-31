@@ -11,6 +11,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QMenu>
+#include <qnotifymanager.h>
 #include "utils/Base64Image.cpp"
 #include "backend/clipboardApi.h"
 #include <QTimer>
@@ -30,8 +31,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     , a_copy(new QAction("复制"))
     , a_copy_base64(new QAction("复制为Base64"))
     , m_copyed(false)
+    , notify(new QNotifyManager(this))
 {
     ui->setupUi(this);
+
+    notify->setMaxCount(3);
+    notify->setDisplayTime(5000);
 
     clipboard = qApp->clipboard();
     clipboardApi = new ClipboardApi;
@@ -144,7 +149,7 @@ void MainWindow::clipboardChanged()
                 auto byteArray = file.readAll();
                 file.close();
 
-                clipboardApi->set(mime.toUtf8(), byteArray.toBase64());
+                checkTime = clipboardApi->set(mime.toUtf8(), byteArray.toBase64()).create_at();
                 updateShowText(QString("(%1)(%2)\n(%3)").arg(f.fileName()).arg(f.size()).arg(mime));
 
                 currentType = File;
@@ -223,6 +228,10 @@ void MainWindow::onClipboardCheckLatest()
         if (object.value("create_at").toString().compare(checkTime) != 0) {
             qd << object.value("create_at").toString() << checkTime;
             onClipboardUpdate();
+//            notify->notify("提示",
+//                QString("变化:(%1)!=(%2)")
+//                    .arg(object.value("create_at").toString())
+//                    .arg(checkTime), ":/systray.png", "");
         }
     }
 }
@@ -232,6 +241,11 @@ void MainWindow::onClipboardCheckLatest()
  * @note   
  * @retval None
  */
+void MainWindow::sendNotify(QString text)
+{
+    notify->notify("提示", text, ":/systray.png", "");
+}
+
 void MainWindow::onClipboardUpdate()
 {
     auto resp = clipboardApi->get();
@@ -270,6 +284,7 @@ void MainWindow::onClipboardUpdate()
                 clipboard->setImage(img);
             }
 
+            sendNotify("新的图片");
             goto done;
         }
 
@@ -281,6 +296,7 @@ void MainWindow::onClipboardUpdate()
                 clipboard->setText(QString::fromUtf8(Base64Text::fromBase64(data).toUtf8()));
                 updateShowText(Base64Text::fromBase64(data), false);
             }
+            sendNotify("新的文本");
             goto done;
         }
 
@@ -317,6 +333,7 @@ void MainWindow::onClipboardUpdate()
 
                 updateShowText(QString("(%1)(%2)\n(%3)").arg(fileName).arg(f.size()).arg(filePath));
             }
+            sendNotify("新的文件");
             goto done;
         }
     }

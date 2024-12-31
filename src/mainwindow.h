@@ -13,7 +13,9 @@ class QClipboard;
 class QLabel;
 class ClipboardApi;
 class QSystemTrayIcon;
+class QNotifyManager;
 QT_END_NAMESPACE
+
 
 namespace Ui {
     class MainWindow;
@@ -33,6 +35,8 @@ public:
         Text,
         File,
     };
+
+    void sendNotify(QString text);
 
 private:
     Ui::MainWindow *ui;
@@ -63,6 +67,7 @@ private:
     QString checkMime;
 
     QSystemTrayIcon *systray;
+    QNotifyManager *notify;
 
 
     void updateShowText(QString text, bool center = true);
