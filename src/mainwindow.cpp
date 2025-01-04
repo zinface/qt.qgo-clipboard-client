@@ -154,6 +154,8 @@ void MainWindow::clipboardChanged()
 
                 currentType = File;
                 checkData = mime.toUtf8().toBase64();
+
+                sendNotify("发送文件", 0.8);
                 return;
             }
         }
@@ -162,7 +164,7 @@ void MainWindow::clipboardChanged()
         checkData = text.toUtf8().toBase64();
         checkTime = clipboardApi->set("text", checkData).create_at();
         updateShowText(text, false);
-
+        sendNotify("发送文本", 0.8);
         return;
     }
 
@@ -182,6 +184,8 @@ void MainWindow::clipboardChanged()
         qd << "Api: set image";
         checkTime = clipboardApi->set("image", Base64Pixmap::fromImage(QPixmap::fromImage(img))).create_at();
         checkData = Base64Pixmap::fromImage(QPixmap::fromImage(img));
+
+        sendNotify("发送图片", 0.8);
     }
 }
 
@@ -241,9 +245,9 @@ void MainWindow::onClipboardCheckLatest()
  * @note   
  * @retval None
  */
-void MainWindow::sendNotify(QString text)
+void MainWindow::sendNotify(const QString &text, const float windowOpacity)
 {
-    notify->notify("提示", text, ":/systray.png", "");
+    notify->notify("提示", text, ":/systray.png", "", windowOpacity);
 }
 
 void MainWindow::onClipboardUpdate()

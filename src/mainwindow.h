@@ -36,7 +36,7 @@ public:
         File,
     };
 
-    void sendNotify(QString text);
+    void sendNotify(const QString &text, const float windowOpacity = 1.0);
 
 private:
     Ui::MainWindow *ui;
