@@ -47,3 +47,20 @@
 
     #endif  //!__CONFIG__H__
     ```
+
+- 构建
+
+    **Linux**
+    ```
+    git clone https://gitee.com/zinface/qt.qgo-clipboard-client
+    cd qt.qgo-clipboard-client
+    make
+
+    # debian/ubuntu/deepin
+    make package
+    sudo dpkg -i ./build/*.deb
+
+    # other
+    make release
+    sudo make -C build install
+    ```
