@@ -51,7 +51,7 @@
 - 构建
 
     **Linux**
-    ```
+    ```shell
     git clone https://gitee.com/zinface/qt.qgo-clipboard-client
     cd qt.qgo-clipboard-client
     make
