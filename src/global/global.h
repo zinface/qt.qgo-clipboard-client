@@ -14,8 +14,15 @@ public:
     QString getAddress() const;
     void setAddress(const QString &newAddress);
 
+    bool notifySend() const;
+    void setNotifySend(bool newNotifySend);
+    bool notifyRecv() const;
+    void setNotifyRecv(bool newNotifyRecv);
+
 private:
-    QString address;
+    QString m_address;
+    bool m_notifySend;
+    bool m_notifyRecv;
 };
 
 #define GL Global::instance()

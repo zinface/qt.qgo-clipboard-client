@@ -1,5 +1,6 @@
 
 #include "mainwindow.h"
+#include "global/global.h"
 #include "ui_mainwindow.h"
 
 #include <QClipboard>
@@ -155,7 +156,7 @@ void MainWindow::clipboardChanged()
                 currentType = File;
                 checkData = mime.toUtf8().toBase64();
 
-                sendNotify("发送文件", 0.8);
+                if (GL.notifySend()) sendNotify("发送文件", 0.8);
                 return;
             }
         }
@@ -164,7 +165,7 @@ void MainWindow::clipboardChanged()
         checkData = text.toUtf8().toBase64();
         checkTime = clipboardApi->set("text", checkData).create_at();
         updateShowText(text, false);
-        sendNotify("发送文本", 0.8);
+        if (GL.notifySend()) sendNotify("发送文本", 0.8);
         return;
     }
 
@@ -185,7 +186,7 @@ void MainWindow::clipboardChanged()
         checkTime = clipboardApi->set("image", Base64Pixmap::fromImage(QPixmap::fromImage(img))).create_at();
         checkData = Base64Pixmap::fromImage(QPixmap::fromImage(img));
 
-        sendNotify("发送图片", 0.8);
+        if (GL.notifySend()) sendNotify("发送图片", 0.8);
     }
 }
 
@@ -288,7 +289,7 @@ void MainWindow::onClipboardUpdate()
                 clipboard->setImage(img);
             }
 
-            sendNotify("新的图片");
+            if (GL.notifyRecv()) sendNotify("新的图片");
             goto done;
         }
 
@@ -300,7 +301,7 @@ void MainWindow::onClipboardUpdate()
                 clipboard->setText(QString::fromUtf8(Base64Text::fromBase64(data).toUtf8()));
                 updateShowText(Base64Text::fromBase64(data), false);
             }
-            sendNotify("新的文本");
+            if (GL.notifyRecv()) sendNotify("新的文本");
             goto done;
         }
 
@@ -337,7 +338,7 @@ void MainWindow::onClipboardUpdate()
 
                 updateShowText(QString("(%1)(%2)\n(%3)").arg(fileName).arg(f.size()).arg(filePath));
             }
-            sendNotify("新的文件");
+            if (GL.notifyRecv()) sendNotify("新的文件");
             goto done;
         }
     }
