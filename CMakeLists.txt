@@ -15,6 +15,11 @@ if(CMAKE_BUILD_TYPE MATCHES "Release")
     add_compile_definitions(QT_NO_WARNING_OUTPUT=1 QT_NO_DEBUG_OUTPUT=1)
 endif(CMAKE_BUILD_TYPE MATCHES "Release")
 
+if(MSVC)
+    # MSVC 编译器处理方案，支持 utf-8 编码的项目
+    add_compile_options(/utf-8)
+endif(MSVC)
+
 configure_file(src/global/config.h.in config.h @ONLY)
 
 # 资源文件路径
