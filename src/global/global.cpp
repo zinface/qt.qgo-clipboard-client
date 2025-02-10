@@ -14,14 +14,14 @@ Global::Global()
 {
     QString clipConfig = PathUtil::clipboardServerConfig();
 
-    {
-        auto address = ConfigUtil::instance().readConfigValue(clipConfig, KEY_SERVER_ADDRESS);
-        if (address.isEmpty()) {
+    { // initialize address
+        m_address = ConfigUtil::instance().readConfigValue(clipConfig, KEY_SERVER_ADDRESS);
+        if (m_address.isEmpty()) {
             m_address = REMOTE_HOST;
         }
     }
 
-    {
+    { // initialize notify send/recv flag
         auto notify_send = ConfigUtil::instance().readConfigValue(clipConfig, KEY_CLIENT_NOTIFY_SEND);
         auto notify_recv = ConfigUtil::instance().readConfigValue(clipConfig, KEY_CLIENT_NOTIFY_RECV);
 
