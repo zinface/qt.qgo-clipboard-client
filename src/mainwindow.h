@@ -80,6 +80,9 @@ protected:
     void resizeEvent(QResizeEvent *event);
 
 private slots:
+    void on_action_exit_triggered();
+
+private slots:
     void on_action_setting_config_triggered();
 };
 

@@ -79,6 +79,8 @@
      <string>设置</string>
     </property>
     <addaction name="action_setting_config"/>
+    <addaction name="separator"/>
+    <addaction name="action_exit"/>
    </widget>
    <addaction name="menu"/>
   </widget>
@@ -86,6 +88,11 @@
   <action name="action_setting_config">
    <property name="text">
     <string>配置服务器</string>
+   </property>
+  </action>
+  <action name="action_exit">
+   <property name="text">
+    <string>退出</string>
    </property>
   </action>
  </widget>

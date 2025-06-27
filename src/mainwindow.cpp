@@ -451,3 +451,9 @@ void MainWindow::on_action_setting_config_triggered()
     dialog.exec();
 }
 
+
+void MainWindow::on_action_exit_triggered()
+{
+    qApp->quit();
+}
+
