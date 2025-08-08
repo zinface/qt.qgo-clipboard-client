@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     }
 
     MainWindow wm;
-    wm.show();
+    // wm.show();
 
     ScreenUtil::moveCenterForCursor(wm);
 
