@@ -6,7 +6,10 @@ def png_to_ico(png_file, ico_file, size):
     img = Image.open(png_file)
     
     # 调整图像大小
-    img = img.resize((size, size), Image.ANTIALIAS)
+    try:
+        img = img.resize((size, size), Image.Resampling.LANCZOS)
+    except:
+        img = img.resize((size, size), Image.ANTIALIAS)
     
     # 将PNG图像转换为ICO格式并保存
     img.save(ico_file, format='ICO')
